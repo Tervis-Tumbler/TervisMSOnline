@@ -13,7 +13,8 @@
 function Remove-TervisMSOLUser{
     param(
         [parameter(mandatory)]$Identity,
-        [parameter(mandatory)]$DirSyncServer
+        [parameter(mandatory)]$DirSyncServer,
+        [parameter(mandatory)]$Delagate
     )
     <# 
     You must install the "Microsoft Online Services Sign-In Assistant for IT Professionals RTW" and 
@@ -24,11 +25,9 @@ function Remove-TervisMSOLUser{
     You must also set the $DirSyncServer variable to the DirSync server in your environment 
     #>
 
-    $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName,Manager
+    $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName
     $DN = $UserObject | select -ExpandProperty DistinguishedName
     $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
-    $ManagerDn = $UserObject | select -ExpandProperty Manager
-    $ManagerUpn = get-aduser $ManagerDn | select -ExpandProperty UserPrincipalName
 
     # Connect to Exchange Online with your user@domain.com credentials
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
@@ -48,7 +47,7 @@ function Remove-TervisMSOLUser{
 
     # Grant shared mailbox permissions to their manager
     if ($ManagerUpn) {
-        Add-MailboxPermission -Identity $UserPrincipalName -User $ManagerUpn -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
+        Add-MailboxPermission -Identity $UserPrincipalName -User $Delagate -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
     } else {
         Write-Verbose "This user does not have a manage defined in AD. You will have to manually delegate this mailbox."
     }
