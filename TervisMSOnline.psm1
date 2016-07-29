@@ -16,7 +16,6 @@ Function Test-TervisUserHasMailbox {
     )
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
     $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-    $credential = get-credential
     $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
     Import-PSSession $Session -Prefix Cloud -DisableNameChecking
     $MsolMailbox = $false
