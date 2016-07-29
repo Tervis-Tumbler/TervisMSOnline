@@ -32,7 +32,7 @@ function Remove-TervisMSOLUser{
 
     # Connect to Exchange Online with your user@domain.com credentials
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $Credential = Get-Credential
+    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
     $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
     Import-PSSession $Session -DisableNameChecking
 
