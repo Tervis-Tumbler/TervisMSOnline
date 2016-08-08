@@ -33,7 +33,7 @@ Function Test-TervisUserHasMailbox {
 
 function Install-TervisMSOnline {
     param(
-        [System.Management.Automation.PSCredential]$ExchangeOnlineCredential = $(get-credential -message "Please supply the credentials to access ExchangeOnline")
+        [System.Management.Automation.PSCredential]$ExchangeOnlineCredential = $(get-credential -message "Please supply the credentials to access ExchangeOnline. Username must be in the form UserName@Domain.com")
     )
     <# 
     You must install the "Microsoft Online Services Sign-In Assistant for IT Professionals RTW" and 
