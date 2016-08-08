@@ -1,4 +1,7 @@
-﻿Function Get-TempPassword() {
+﻿#Requires -Modules MSOnline
+#Requires -Version 5
+
+Function Get-TempPassword() {
     Param(
         [int]$length=120,
         [string[]]$sourcedata
@@ -28,11 +31,9 @@ Function Test-TervisUserHasMailbox {
     }
 }
 
-function Remove-TervisMSOLUser{
+function Install-TervisMSOnline {
     param(
-        [parameter(mandatory)]$Identity,
-        [parameter(mandatory)]$DirSyncServer,
-        [parameter(mandatory)]$Delagate
+        [System.Management.Automation.PSCredential]$ExchangeOnlineCredential = $(get-credential -message "Please supply the credentials to access ExchangeOnline")
     )
     <# 
     You must install the "Microsoft Online Services Sign-In Assistant for IT Professionals RTW" and 
@@ -40,8 +41,21 @@ function Remove-TervisMSOLUser{
     The links are below.
     http://go.microsoft.com/fwlink/?LinkID=286152
     http://go.microsoft.com/fwlink/p/?linkid=236297
-    You must also set the $DirSyncServer variable to the DirSync server in your environment 
     #>
+
+    $ExchangeOnlineCredential | Export-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    start-process "http://go.microsoft.com/fwlink/?LinkID=286152"
+    Read-Host "Please install Microsoft Online Services Sign-In Assistant for IT Professionals RTW and then hit enter"
+    Invoke-WebRequest -Uri http://go.microsoft.com/fwlink/p/?linkid=236297 -OutFile AdministrationConfig-en.msi
+    Start-Process AdministrationConfig-en.msi
+}
+
+function Remove-TervisMSOLUser{
+    param(
+        [parameter(mandatory)]$Identity,
+        [parameter(mandatory)]$AzureADConnectComputerName,
+        $IdentityOfUserToRecieveAccessToRemovedUsersMailbox
+    )
 
     $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName
     $DN = $UserObject | select -ExpandProperty DistinguishedName
@@ -60,11 +74,9 @@ function Remove-TervisMSOLUser{
     Write-Verbose "Convert the users mailbox to a shared mailbox"
     Set-Mailbox $UserPrincipalName -Type shared
 
-    Write-Verbose 'Granting mailbox permissions to the $Delagate'
-    if ($ManagerUpn) {
-        Add-MailboxPermission -Identity $UserPrincipalName -User $Delagate -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
-    } else {
-        Write-Verbose "This user does not have a manage defined in AD. You will have to manually delegate this mailbox."
+    Write-Verbose "Granting mailbox permissions to the $IdentityOfUserToRecieveAccessToRemovedUsersMailbox"
+    if ($IdentityOfUserToRecieveAccessToRemovedUsersMailbox) {
+        Add-MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToRecieveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
     }
 
     Write-Verbose "Setting a 120 character strong password on the user account"
