@@ -104,7 +104,7 @@ function Remove-TervisMSOLUser{
     Set-ADAccountExpiration $identity -DateTime (get-date)
 
 
-    Connect-MsolService -CurrentCredential
+    Connect-MsolService -Credential $Credential
     Write-Verbose "Removing the Users Office 365 Licenses"
     $Licenses = get-msoluser -UserPrincipalName $UserPrincipalName |
     select -ExpandProperty Licenses | 
@@ -123,7 +123,7 @@ function Remove-TervisMSOLUser{
     Start-Sleep 30
 
     Write-Verbose 'Starting Sync From AD to Office 365 & Azure AD'
-    Invoke-Command -ComputerName $DirSyncServer -ScriptBlock {Start-ScheduledTask 'Azure AD Sync Scheduler'}
+    Invoke-Command -ComputerName $AzureADConnectComputerName -ScriptBlock {Start-ScheduledTask 'Azure AD Sync Scheduler'}
     Start-Sleep 30
     Write-Verbose 'Complete!'
 }
