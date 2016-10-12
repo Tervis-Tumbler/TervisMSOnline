@@ -1,3 +1,4 @@
+﻿#Requires -Modules MSOnline
 #Requires -Version 5
 
 Function Get-TempPassword() {
