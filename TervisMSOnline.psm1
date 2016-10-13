@@ -7,7 +7,7 @@ Function Get-TempPassword() {
         [string[]]$sourcedata
     )
 
-    For ($loop=1; $loop –le $length; $loop++) {
+    For ($loop=1; $loop -le $length; $loop++) {
         $TempPassword+=($sourcedata | Get-Random)
     }
     Return $TempPassword
@@ -82,8 +82,8 @@ function Remove-TervisMSOLUser{
     Write-Verbose "Setting a 120 character strong password on the user account"
 
     $ascii=$NULL;
-    For ($a=48;$a –le 122;$a++) {$ascii+=,[char][byte]$a }
-    $PW= Get-TempPassword –length 120 –sourcedata $ascii
+    For ($a=48;$a -le 122;$a++) {$ascii+=,[char][byte]$a }
+    $PW= Get-TempPassword -length 120 -sourcedata $ascii
     $SecurePW = ConvertTo-SecureString $PW -asplaintext -force
     Set-ADAccountPassword -Identity $identity -NewPassword $SecurePW
 
