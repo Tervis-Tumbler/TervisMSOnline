@@ -44,10 +44,11 @@ function Install-TervisMSOnline {
     #>
 
     $ExchangeOnlineCredential | Export-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-    start-process "http://go.microsoft.com/fwlink/?LinkID=286152"
-    Read-Host "Please install Microsoft Online Services Sign-In Assistant for IT Professionals RTW and then hit enter"
-    Invoke-WebRequest -Uri http://go.microsoft.com/fwlink/p/?linkid=236297 -OutFile AdministrationConfig-en.msi
-    Start-Process AdministrationConfig-en.msi
+    Write-Verbose -Message "Installing Microsoft Online Services Sign-In Assistant for IT Professionals RTW..."
+    Install-TervisChocolateyPackageInstall -PackageName msonline-signin-assistant -Force
+    
+    Write-Verbose -Message "Installing Azure Active Directory Module for Windows PowerShell (64-bit version)..."
+    Install-TervisChocolateyPackageInstall -PackageName azure-ad-powershell-module -Force
 }
 
 function Remove-TervisMSOLUser{
