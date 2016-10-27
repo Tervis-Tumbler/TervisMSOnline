@@ -133,19 +133,19 @@ function Send-SupervisorOfTerminatedUserSharedEmailInstructions {
     param(
       $UserNameOfSupervisor,  
       $UserNameOfTerminatedUser  
-        )
+    )
+    Write-Verbose "Sending instructions to supervisor for Outlook for Mac"
+    $ADObjectOfSupervisor = Get-ADUser -Identity $UserNameOfSupervisor
+    $FirstNameOfSupervisor = $ADObjectOfSupervisor.GivenName
+    $EmailAddressofSupervisor = $ADObjectOfSupervisor.UserPrincipalName
 
-$ADObjectOfSupervisor = Get-ADUser -Identity $UserNameOfSupervisor
-$FirstNameOfSupervisor = $ADObjectOfSupervisor.GivenName
-$EmailAddressofSupervisor = $ADObjectOfSupervisor.UserPrincipalName
+    $ADObjectOfTerminatedUser = Get-ADUser -Identity $UserNameOfTerminatedUser
+    $FullNameofTerminatedUser = $ADObjectOfTerminatedUser.Name
 
-$ADObjectOfTerminatedUser = Get-ADUser -Identity $UserNameOfTerminatedUser
-$FullNameofTerminatedUser = $ADObjectOfTerminatedUser.Name
+    $Outlook2011Instructions = "\\fs1\DisasterRecovery\Source Controlled Items\TervisMSOnline\Add Shared Mailbox to Outlook 2011 Mac.docx"
+    $Outlook2016Instructions = "\\fs1\DisasterRecovery\Source Controlled Items\TervisMSOnline\Add Shared Mailbox to Outlook 2016 Mac.docx"
 
-$Outlook2011Instructions = "\\fs1\DisasterRecovery\Source Controlled Items\TervisMSOnline\Add Shared Mailbox to Outlook 2011 Mac.docx"
-$Outlook2016Instructions = "\\fs1\DisasterRecovery\Source Controlled Items\TervisMSOnline\Add Shared Mailbox to Outlook 2016 Mac.docx"
-
-$HTMLBody = @"
+    $HTMLBody = @"
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <meta name="Generator" content="Microsoft Word 15 (filtered medium)">
