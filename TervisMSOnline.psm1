@@ -52,6 +52,7 @@ function Install-TervisMSOnline {
 }
 
 function Remove-TervisMSOLUser{
+    [CmdletBinding()]
     param(
         [parameter(mandatory)]$Identity,
         [parameter(mandatory)]$AzureADConnectComputerName,
@@ -108,8 +109,8 @@ function Remove-TervisMSOLUser{
     Connect-MsolService -Credential $Credential
     Write-Verbose "Removing the Users Office 365 Licenses"
     $Licenses = get-msoluser -UserPrincipalName $UserPrincipalName |
-    select -ExpandProperty Licenses | 
-    select -ExpandProperty AccountSkuId
+        select -ExpandProperty Licenses | 
+        select -ExpandProperty AccountSkuId
 
     foreach ($License in $licenses) {
         Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -RemoveLicenses $License
