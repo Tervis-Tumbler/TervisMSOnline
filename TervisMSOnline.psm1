@@ -55,7 +55,7 @@ function Remove-TervisMSOLUser{
     param(
         [parameter(mandatory)]$Identity,
         [parameter(mandatory)]$AzureADConnectComputerName,
-        $IdentityOfUserToRecieveAccessToRemovedUsersMailbox
+        $IdentityOfUserToReceiveAccessToRemovedUsersMailbox
     )
 
     $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName
@@ -75,9 +75,9 @@ function Remove-TervisMSOLUser{
     Write-Verbose "Convert the users mailbox to a shared mailbox"
     Set-Mailbox $UserPrincipalName -Type shared
 
-    Write-Verbose "Granting mailbox permissions to the $IdentityOfUserToRecieveAccessToRemovedUsersMailbox"
-    if ($IdentityOfUserToRecieveAccessToRemovedUsersMailbox) {
-        Add-MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToRecieveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
+    Write-Verbose "Granting mailbox permissions to the $IdentityOfUserToReceiveAccessToRemovedUsersMailbox"
+    if ($IdentityOfUserToReceiveAccessToRemovedUsersMailbox) {
+        Add-MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
     }
 
     Write-Verbose "Setting a 120 character strong password on the user account"
