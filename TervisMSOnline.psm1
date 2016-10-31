@@ -238,3 +238,19 @@ CONFIDENTIALITY NOTICE: At Tervis we make great drinkware that helps people cele
     Send-TervisMailMessage -To $EmailAddressofSupervisor -From 'Help Desk Team <HelpDeskTeam@tervis.com>' -Subject 'Instructions to Add Shared Email to Outlook' -Body $HTMLBody -Attachments $Outlook2011Instructions, $Outlook2016Instructions -bodyashtml
 
 }
+
+function Move-SharedMailboxObjects {
+    param(
+        [parameter(mandatory)]$DistinguishedNameOfTargetOU
+    )
+    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
+    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
+    Import-PSSession $Session -Prefix 'Cloud' -DisableNameChecking
+
+    $SharedMailboxOnOffice365 = Get-CloudMailbox -RecipientTypeDetails 'Shared' -ResultSize 'Unlimited'
+    foreach ($SharedMailbox in $SharedMailboxOnOffice365) {
+        [string]$UserName = ($SharedMailbox | Select -ExpandProperty UserPrincipalName).Split('@')[0]
+        Get-ADUser $UserName | Move-ADObject -TargetPath $DistinguishedNameOfTargetOU -Confirm:$false
+    }
+}
