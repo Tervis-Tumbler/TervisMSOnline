@@ -31,6 +31,15 @@ Function Test-TervisUserHasMailbox {
     }
 }
 
+function Import-TervisMSOnlinePSSession {
+    [CmdletBinding()]
+    param ()
+    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
+    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
+    Import-PSSession $Session -DisableNameChecking
+}
+
 function Install-TervisMSOnline {
     param(
         [System.Management.Automation.PSCredential]$ExchangeOnlineCredential = $(get-credential -message "Please supply the credentials to access ExchangeOnline. Username must be in the form UserName@Domain.com")
@@ -63,10 +72,7 @@ function Remove-TervisMSOLUser{
     $DN = $UserObject | select -ExpandProperty DistinguishedName
     $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
 
-    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-    Import-PSSession $Session -DisableNameChecking
+    Import-TervisMSOnlinePSSession
 
     Write-Verbose "Removing Users Active Sync Devices"
     if (Get-ActiveSyncDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
