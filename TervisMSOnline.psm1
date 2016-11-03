@@ -31,6 +31,50 @@ Function Test-TervisUserHasMailbox {
     }
 }
 
+function Test-TervisUserHasMSOnlineMailbox {
+    param(
+        [parameter(mandatory)]$Identity
+    )
+    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
+    $WarningPreference = 'SilentlyContinue'
+    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $CloudSession = New-PSSession -Name MSOnlineSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
+    
+    Import-PSSession $CloudSession -AllowClobber | Out-Null
+    
+    if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
+        $MsolMailbox = $true
+    }
+    else {
+        $MSolMailbox = $false    
+    }
+    
+    $MsolMailbox
+    
+    Remove-PSSession -Name MSOnlineSession
+}
+
+function Test-TervisUserHasOnPremMailbox {
+    param(
+        [parameter(mandatory)]$Identity
+    )
+    $WarningPreference = 'SilentlyContinue'
+    $OnPremSession = New-PSSession -Name OnPremSession -ConfigurationName Microsoft.Exchange -Authentication Kerberos -ConnectionUri http://exchange2010.tervis.prv/powershell
+    
+    Import-PSSession $OnPremSession -AllowClobber | Out-Null
+    
+    if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
+        $OnPremMailbox = $true
+    }
+    else {
+        $OnPremMailbox = $false    
+    }
+    
+    $OnPremMailbox
+    
+    Remove-PSSession -Name OnPremSession
+}
+
 function Import-TervisMSOnlinePSSession {
     [CmdletBinding()]
     param ()
