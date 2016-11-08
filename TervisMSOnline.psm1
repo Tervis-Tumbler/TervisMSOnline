@@ -77,10 +77,22 @@ function Test-TervisUserHasOnPremMailbox {
 function Import-TervisMSOnlinePSSession {
     [CmdletBinding()]
     param ()
-    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-    Import-PSSession $Session -DisableNameChecking
+    Write-Verbose "Connect to Exchange Online"
+    $Sessions = Get-PsSession
+    $Connected = $false
+    Foreach ($Session in $Sessions) {
+        if ($Session.ComputerName -eq 'ps.outlook.com' -and $Session.ConfigurationName -eq 'Microsoft.Exchange' -and $Session.State -eq 'Opened') {
+            $Connected = $true
+        } elseif ($Session.ComputerName -eq 'ps.outlook.com' -and $Session.ConfigurationName -eq 'Microsoft.Exchange' -and $Session.State -eq 'Broken') {
+            Remove-PSSession $Session
+        }
+    }
+    if ($Connected -eq $false) {
+        Write-Verbose "Connect to Exchange Online"
+        $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
+        Import-PSSession $Session -Prefix 'Cloud' -DisableNameChecking -AllowClobber
+    }
 }
 
 function Install-TervisMSOnline {
@@ -292,10 +304,22 @@ function Move-SharedMailboxObjects {
     param(
         [parameter(mandatory)]$DistinguishedNameOfTargetOU
     )
-    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-    Import-PSSession $Session -Prefix 'Cloud' -DisableNameChecking
+    Write-Verbose "Connect to Exchange Online"
+    $Sessions = Get-PsSession
+    $Connected = $false
+    Foreach ($Session in $Sessions) {
+        if ($Session.ComputerName -eq 'ps.outlook.com' -and $Session.ConfigurationName -eq 'Microsoft.Exchange' -and $Session.State -eq 'Opened') {
+            $Connected = $true
+        } elseif ($Session.ComputerName -eq 'ps.outlook.com' -and $Session.ConfigurationName -eq 'Microsoft.Exchange' -and $Session.State -eq 'Broken') {
+            Remove-PSSession $Session
+        }
+    }
+    if ($Connected -eq $false) {
+        Write-Verbose "Connect to Exchange Online"
+        $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
+        Import-PSSession $Session -Prefix 'Cloud' -DisableNameChecking -AllowClobber
+    }
 
     $SharedMailboxOnOffice365 = Get-CloudMailbox -RecipientTypeDetails 'Shared' -ResultSize 'Unlimited'
     foreach ($SharedMailbox in $SharedMailboxOnOffice365) {
