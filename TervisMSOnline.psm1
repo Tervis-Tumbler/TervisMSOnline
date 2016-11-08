@@ -91,7 +91,7 @@ function Import-TervisMSOnlinePSSession {
         Write-Verbose "Connect to Exchange Online"
         $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-        Import-PSSession $Session -Prefix 'Cloud' -DisableNameChecking -AllowClobber
+        Import-PSSession $Session -DisableNameChecking -AllowClobber
     }
 }
 
