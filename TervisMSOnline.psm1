@@ -19,11 +19,11 @@ Function Test-TervisUserHasMailbox {
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
     $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
     $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-    Import-PSSession $Session -Prefix Cloud -DisableNameChecking
+    Import-PSSession $Session -Prefix O365 -DisableNameChecking
     $MsolMailbox = $false
     $OnPremiseMailbox = $false
     add-pssnapin Microsoft.Exchange.Management.PowerShell.E2010
-    if (Get-CloudMailbox $Identity -ErrorAction SilentlyContinue) {
+    if (Get-O365Mailbox $Identity -ErrorAction SilentlyContinue) {
         $MsolMailbox = $true
     } elseif (get-mailbox $Identity -ErrorAction SilentlyContinue){
         $OnPremiseMailbox = $true
@@ -37,9 +37,9 @@ function Test-TervisUserHasMSOnlineMailbox {
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
     $WarningPreference = 'SilentlyContinue'
     $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-    $CloudSession = New-PSSession -Name MSOnlineSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
+    $O365Session = New-PSSession -Name MSOnlineSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
     
-    Import-PSSession $CloudSession -AllowClobber | Out-Null
+    Import-PSSession $O365Session -AllowClobber | Out-Null
     
     if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
         $MsolMailbox = $true
@@ -91,7 +91,7 @@ function Import-TervisMSOnlinePSSession {
         Write-Verbose "Connect to Exchange Online"
         $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-        Import-PSSession $Session -DisableNameChecking -AllowClobber
+        Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber
     }
 }
 
@@ -130,16 +130,16 @@ function Remove-TervisMSOLUser{
     Import-TervisMSOnlinePSSession
 
     Write-Verbose "Removing Users Active Sync Devices"
-    if (Get-ActiveSyncDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
-        Get-ActiveSyncDevice -Mailbox $UserPrincipalName | Remove-ActiveSyncDevice
+    if (Get-O365ActiveSyncDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
+        Get-O365ActiveSyncDevice -Mailbox $UserPrincipalName | Remove-O365ActiveSyncDevice
     }
 
     Write-Verbose "Convert the users mailbox to a shared mailbox"
-    Set-Mailbox $UserPrincipalName -Type shared
+    Set-O365Mailbox $UserPrincipalName -Type shared
 
     Write-Verbose "Granting mailbox permissions to the $IdentityOfUserToReceiveAccessToRemovedUsersMailbox"
     if ($IdentityOfUserToReceiveAccessToRemovedUsersMailbox) {
-        Add-MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
+        Add-O365MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
     }
 
     Write-Verbose "Setting a 120 character strong password on the user account"
@@ -169,7 +169,7 @@ function Remove-TervisMSOLUser{
 
     Connect-MsolService -Credential $Credential
     Write-Verbose "Removing the Users Office 365 Licenses"
-    $Licenses = get-msoluser -UserPrincipalName $UserPrincipalName |
+    $Licenses = Get-MsolUser -UserPrincipalName $UserPrincipalName |
         select -ExpandProperty Licenses | 
         select -ExpandProperty AccountSkuId
 
@@ -318,10 +318,10 @@ function Move-SharedMailboxObjects {
         Write-Verbose "Connect to Exchange Online"
         $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-        Import-PSSession $Session -Prefix 'Cloud' -DisableNameChecking -AllowClobber
+        Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber
     }
 
-    $SharedMailboxOnOffice365 = Get-CloudMailbox -RecipientTypeDetails 'Shared' -ResultSize 'Unlimited'
+    $SharedMailboxOnOffice365 = Get-O365Mailbox -RecipientTypeDetails 'Shared' -ResultSize 'Unlimited'
     foreach ($SharedMailbox in $SharedMailboxOnOffice365) {
         [string]$UserName = ($SharedMailbox | Select -ExpandProperty UserPrincipalName).Split('@')[0]
         Get-ADUser $UserName | Move-ADObject -TargetPath $DistinguishedNameOfTargetOU -Confirm:$false
