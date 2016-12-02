@@ -90,9 +90,9 @@ function Import-TervisMSOnlinePSSession {
     if ($Connected -eq $false) {
         Write-Verbose "Connect to Exchange Online"
         $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
-        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-        Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential -WarningAction SilentlyContinue 
     }
+    Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber | Out-Null
 }
 
 function Install-TervisMSOnline {
@@ -139,7 +139,7 @@ function Remove-TervisMSOLUser{
 
     Write-Verbose "Granting mailbox permissions to the $IdentityOfUserToReceiveAccessToRemovedUsersMailbox"
     if ($IdentityOfUserToReceiveAccessToRemovedUsersMailbox) {
-        Add-O365MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true
+        Add-O365MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true | Out-Null
     }
 
     Write-Verbose "Setting a 120 character strong password on the user account"
@@ -166,7 +166,7 @@ function Remove-TervisMSOLUser{
     Write-Verbose "Setting AD account expiration"
     Set-ADAccountExpiration $identity -DateTime (get-date)
 
-
+    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
     Connect-MsolService -Credential $Credential
     Write-Verbose "Removing the Users Office 365 Licenses"
     $Licenses = Get-MsolUser -UserPrincipalName $UserPrincipalName |
@@ -182,13 +182,13 @@ function Remove-TervisMSOLUser{
 
     Write-Verbose "Forcing a sync between domain controllers"
     $DC = Get-ADDomainController | select -ExpandProperty HostName
-    Invoke-Command -ComputerName $DC -ScriptBlock {repadmin /syncall}
+    Invoke-Command -ComputerName $DC -ScriptBlock {repadmin /syncall} | Out-Null
     Start-Sleep 30
 
-    Write-Verbose 'Starting Sync From AD to Office 365 & Azure AD'
-    Invoke-Command -ComputerName $AzureADConnectComputerName -ScriptBlock {Start-ScheduledTask 'Azure AD Sync Scheduler'}
+    Write-Verbose "Starting Sync From AD to Office 365 & Azure AD"
+    Invoke-Command -ComputerName $AzureADConnectComputerName -ScriptBlock {Start-ScheduledTask "Azure AD Sync Scheduler"}
     Start-Sleep 30
-    Write-Verbose 'Complete!'
+    Write-Verbose "Complete!"
 }
 
 function Send-SupervisorOfTerminatedUserSharedEmailInstructions {
