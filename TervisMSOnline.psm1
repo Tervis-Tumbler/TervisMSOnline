@@ -123,7 +123,7 @@ function Remove-TervisMSOLUser{
         $IdentityOfUserToReceiveAccessToRemovedUsersMailbox
     )
 
-    $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName
+    $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName,ProtectedFromAccidentalDeletion
     $DN = $UserObject | select -ExpandProperty DistinguishedName
     $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
 
@@ -151,8 +151,12 @@ function Remove-TervisMSOLUser{
     Set-ADAccountPassword -Identity $identity -NewPassword $SecurePW
 
     Write-Verbose "Moving user account to the 'Comapny - Disabled Accounts' OU in AD"
+    if ($UserObject.ProtectedFromAccidentalDeletion) {
+        Set-ADObject -Identity $DN -ProtectedFromAccidentalDeletion $false
+    }
     $OU = Get-ADOrganizationalUnit -filter * | where DistinguishedName -like "OU=Company- Disabled Accounts*" | select -ExpandProperty DistinguishedName
     Move-ADObject -Identity $DN -TargetPath $OU
+    Set-ADObject -Identity $DN -ProtectedFromAccidentalDeletion $true
 
     Write-Verbose "Removing all AD group memberships"
     $groups = Get-ADUser $identity -Properties MemberOf | select -ExpandProperty MemberOf
