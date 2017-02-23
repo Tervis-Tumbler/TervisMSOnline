@@ -331,3 +331,29 @@ function Move-SharedMailboxObjects {
         Get-ADUser $UserName | Move-ADObject -TargetPath $DistinguishedNameOfTargetOU -Confirm:$false
     }
 }
+
+
+function Add-TervisMSOnlineAdminRoleMember {
+    [CmdletBinding()]
+    param (
+        [parameter(mandatory)]$UserPrincipalName,
+        [ValidateSet(
+        "Billing Administrator", 
+        "Company Administrator", 
+        "Compliance Administrator", 
+        "Device Administrators", 
+        "Exchange Service Administrator", 
+        "Helpdesk Administrator",
+        "Lync Service Administrator",
+        "Privileged Role Administrator",
+        "Security Administrator",
+        "Service Support Administrator",
+        "SharePoint Service Administrator",
+        "User Account Administrator"
+        )]$RoleName
+    )
+    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    Connect-MsolService -Credential $Credential
+
+    Add-MsolRoleMember -RoleMemberEmailAddress $UserPrincipalName -RoleName $RoleName
+}
