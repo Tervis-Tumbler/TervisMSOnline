@@ -183,16 +183,7 @@ function Remove-TervisMSOLUser{
 
     Write-Verbose "Blocking the Users Office 365 Logons"
     Set-MsolUser -UserPrincipalName $UserPrincipalName -BlockCredential:$true
-
-    Write-Verbose "Forcing a sync between domain controllers"
-    $DC = Get-ADDomainController | select -ExpandProperty HostName
-    Invoke-Command -ComputerName $DC -ScriptBlock {repadmin /syncall} | Out-Null
-    Start-Sleep 30
-
-    Write-Verbose "Starting Sync From AD to Office 365 & Azure AD"
-    Invoke-Command -ComputerName $AzureADConnectComputerName -ScriptBlock {Start-ADSyncSyncCycle -PolicyType Delta}
-    Start-Sleep 30
-    Write-Verbose "Complete!"
+s
 }
 
 function Send-SupervisorOfTerminatedUserSharedEmailInstructions {
