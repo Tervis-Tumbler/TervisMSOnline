@@ -183,7 +183,6 @@ function Remove-TervisMSOLUser{
 
     Write-Verbose "Blocking the Users Office 365 Logons"
     Set-MsolUser -UserPrincipalName $UserPrincipalName -BlockCredential:$true
-s
 }
 
 function Send-SupervisorOfTerminatedUserSharedEmailInstructions {
