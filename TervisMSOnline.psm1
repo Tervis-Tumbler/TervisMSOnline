@@ -156,7 +156,8 @@ function Remove-TervisMSOLUser{
     }
     $OU = Get-ADOrganizationalUnit -filter * | where DistinguishedName -like "OU=Company- Disabled Accounts*" | select -ExpandProperty DistinguishedName
     Move-ADObject -Identity $DN -TargetPath $OU
-    Set-ADObject -Identity $DN -ProtectedFromAccidentalDeletion $true
+    $NewDN = (Get-ADUser -Identity $Identity).DistinguishedName
+    Set-ADObject -Identity $NewDN -ProtectedFromAccidentalDeletion $true
 
     Write-Verbose "Removing all AD group memberships"
     $groups = Get-ADUser $identity -Properties MemberOf | select -ExpandProperty MemberOf
