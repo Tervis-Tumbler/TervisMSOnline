@@ -109,10 +109,25 @@ function Install-TervisMSOnline {
 
     $ExchangeOnlineCredential | Export-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
     Write-Verbose -Message "Installing Microsoft Online Services Sign-In Assistant for IT Professionals RTW..."
-    Install-TervisChocolateyPackageInstall -PackageName msonline-signin-assistant -Force
+    Install-TervisChocolateyPackageInstall -PackageName msonline-signin-assistant
     
     Write-Verbose -Message "Installing Azure Active Directory Module for Windows PowerShell (64-bit version)..."
-    Install-TervisChocolateyPackageInstall -PackageName azure-ad-powershell-module -Force
+    Install-TervisChocolateyPackageInstall -PackageName azure-ad-powershell-module
+}
+
+function Remove-TervisMobileDevice {
+    [CmdletBinding()]
+    param(
+        [parameter(mandatory)]$Identity
+    )
+    Import-TervisMSOnlinePSSession
+    Write-Verbose "Office 365 Removing Mobile Devices"    
+    
+    $UserPrincipalName = Get-ADUser -Identity $Identity -properties UserPrincipalName -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty UserPrincipalName
+
+    Get-O365MobileDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue | 
+    Remove-O365MobileDevice -Confirm:$false
 }
 
 function Remove-TervisMSOLUser{
@@ -129,10 +144,7 @@ function Remove-TervisMSOLUser{
 
     Import-TervisMSOnlinePSSession
 
-    Write-Verbose "Removing Users Active Sync Devices"
-    if (Get-O365ActiveSyncDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
-        Get-O365ActiveSyncDevice -Mailbox $UserPrincipalName | Remove-O365ActiveSyncDevice
-    }
+    Remove-TervisMobileDevice -Identity $Identity
 
     Write-Verbose "Convert the users mailbox to a shared mailbox"
     Set-O365Mailbox $UserPrincipalName -Type shared
