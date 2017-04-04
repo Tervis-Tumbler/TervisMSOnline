@@ -17,7 +17,7 @@ Function Test-TervisUserHasMailbox {
         [parameter(mandatory)]$Identity
     )
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $Credential = Get-ExchangeOnlineCredential
     $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
     Import-PSSession $Session -Prefix O365 -DisableNameChecking
     $MsolMailbox = $false
@@ -36,7 +36,7 @@ function Test-TervisUserHasMSOnlineMailbox {
     )
     write-verbose "Connect to Exchange Online with your user@domain.com credentials"
     $WarningPreference = 'SilentlyContinue'
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $Credential = Get-ExchangeOnlineCredential
     $O365Session = New-PSSession -Name MSOnlineSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
     
     Import-PSSession $O365Session -AllowClobber | Out-Null
@@ -89,10 +89,21 @@ function Import-TervisMSOnlinePSSession {
     }
     if ($Connected -eq $false) {
         Write-Verbose "Connect to Exchange Online"
-        $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+        $Credential = Get-ExchangeOnlineCredential
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential -WarningAction SilentlyContinue 
     }
     Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber | Out-Null
+}
+
+function Get-ExchangeOnlineCredential {
+    Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+}
+
+function Set-ExchangeOnlineCredential {
+    param(
+        [Parameter(Mandatory)][System.Management.Automation.PSCredential]$Credential
+    )
+    $Credential | Export-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
 }
 
 function Install-TervisMSOnline {
@@ -107,7 +118,7 @@ function Install-TervisMSOnline {
     http://go.microsoft.com/fwlink/p/?linkid=236297
     #>
 
-    $ExchangeOnlineCredential | Export-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    Set-ExchangeOnlineCredential -Credential $ExchangeOnlineCredential 
     Write-Verbose -Message "Installing Microsoft Online Services Sign-In Assistant for IT Professionals RTW..."
     Install-TervisChocolateyPackageInstall -PackageName msonline-signin-assistant
     
@@ -183,7 +194,7 @@ function Remove-TervisMSOLUser{
     Write-Verbose "Setting AD account expiration"
     Set-ADAccountExpiration $identity -DateTime (get-date)
 
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $Credential = Get-ExchangeOnlineCredential
     Connect-MsolService -Credential $Credential
     Write-Verbose "Removing the Users Office 365 Licenses"
     $Licenses = Get-MsolUser -UserPrincipalName $UserPrincipalName |
@@ -323,7 +334,7 @@ function Move-SharedMailboxObjects {
     }
     if ($Connected -eq $false) {
         Write-Verbose "Connect to Exchange Online"
-        $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+        $Credential = Get-ExchangeOnlineCredential
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
         Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber
     }
@@ -355,7 +366,7 @@ function Add-TervisMSOnlineAdminRoleMember {
         "User Account Administrator"
         )]$RoleName
     )
-    $Credential = Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+    $Credential = Get-ExchangeOnlineCredential
     Connect-MsolService -Credential $Credential
 
     Add-MsolRoleMember -RoleMemberEmailAddress $UserPrincipalName -RoleName $RoleName
