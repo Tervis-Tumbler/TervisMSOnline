@@ -1,17 +1,5 @@
 ﻿#Requires -Version 5
 
-Function Get-TempPassword() {
-    Param(
-        [int]$length=120,
-        [string[]]$sourcedata
-    )
-
-    For ($loop=1; $loop -le $length; $loop++) {
-        $TempPassword+=($sourcedata | Get-Random)
-    }
-    Return $TempPassword
-}
-
 Function Test-TervisUserHasMailbox {
     param(
         [parameter(mandatory)]$Identity
@@ -164,35 +152,6 @@ function Remove-TervisMSOLUser{
     if ($IdentityOfUserToReceiveAccessToRemovedUsersMailbox) {
         Add-O365MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true | Out-Null
     }
-
-    Write-Verbose "Setting a 120 character strong password on the user account"
-
-    $ascii=$NULL;
-    For ($a=48;$a -le 122;$a++) {$ascii+=,[char][byte]$a }
-    $PW= Get-TempPassword -length 120 -sourcedata $ascii
-    $SecurePW = ConvertTo-SecureString $PW -asplaintext -force
-    Set-ADAccountPassword -Identity $identity -NewPassword $SecurePW
-
-    Write-Verbose "Moving user account to the 'Comapny - Disabled Accounts' OU in AD"
-    if ($UserObject.ProtectedFromAccidentalDeletion) {
-        Set-ADObject -Identity $DN -ProtectedFromAccidentalDeletion $false
-    }
-    $OU = Get-ADOrganizationalUnit -filter * | where DistinguishedName -like "OU=Company- Disabled Accounts*" | select -ExpandProperty DistinguishedName
-    Move-ADObject -Identity $DN -TargetPath $OU
-    $NewDN = (Get-ADUser -Identity $Identity).DistinguishedName
-    Set-ADObject -Identity $NewDN -ProtectedFromAccidentalDeletion $true
-
-    Write-Verbose "Removing all AD group memberships"
-    $groups = Get-ADUser $identity -Properties MemberOf | select -ExpandProperty MemberOf
-    foreach ($group in $groups) {
-        Remove-ADGroupMember -Identity $group -Members $identity -Confirm:$false
-    }
-
-    Write-Verbose "Disabling AD account"
-    Disable-ADAccount $identity
-
-    Write-Verbose "Setting AD account expiration"
-    Set-ADAccountExpiration $identity -DateTime (get-date)
 
     $Credential = Get-ExchangeOnlineCredential
     Connect-MsolService -Credential $Credential
