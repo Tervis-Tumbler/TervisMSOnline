@@ -30,15 +30,23 @@ function Test-TervisUserHasMSOnlineMailbox {
     Import-PSSession $O365Session -AllowClobber | Out-Null
     
     if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
-        $MsolMailbox = $true
-    }
-    else {
+       #$MsolMailbox = $true
+       $UserPrincipalName = Get-Mailbox $Identity | select UserPrincipalName
+       $Licenses = Get-MsolUser -UserPrincipalName $UserPrincipalName.UserPrincipalName 
+       if ($Licenses.IsLicensed -Like "True") {
+       $MsolMailbox = $true
+       } else {
+          $MSolMailbox = $false
+       }
+    
+    } else {
         $MSolMailbox = $false    
     }
     
     $MsolMailbox
     
     Remove-PSSession -Name MSOnlineSession
+
 }
 
 function Test-TervisUserHasOnPremMailbox {
@@ -46,7 +54,7 @@ function Test-TervisUserHasOnPremMailbox {
         [parameter(mandatory)]$Identity
     )
     $WarningPreference = 'SilentlyContinue'
-    $OnPremSession = New-PSSession -Name OnPremSession -ConfigurationName Microsoft.Exchange -Authentication Kerberos -ConnectionUri http://exchange2010.tervis.prv/powershell
+    $OnPremSession = New-PSSession -Name OnPremSession -ConfigurationName Microsoft.Exchange -Authentication Kerberos -ConnectionUri http://exchange2016.tervis.prv/powershell
     
     Import-PSSession $OnPremSession -AllowClobber | Out-Null
     
