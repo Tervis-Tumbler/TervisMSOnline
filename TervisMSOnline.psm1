@@ -30,15 +30,8 @@ function Test-TervisUserHasMSOnlineMailbox {
     Import-PSSession $O365Session -AllowClobber | Out-Null
     
     if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
-       #$MsolMailbox = $true
-       $UserPrincipalName = Get-Mailbox $Identity | select UserPrincipalName
-       $Licenses = Get-MsolUser -UserPrincipalName $UserPrincipalName.UserPrincipalName 
-       if ($Licenses.IsLicensed -Like "True") {
        $MsolMailbox = $true
-       } else {
-          $MSolMailbox = $false
-       }
-    
+       
     } else {
         $MSolMailbox = $false    
     }
