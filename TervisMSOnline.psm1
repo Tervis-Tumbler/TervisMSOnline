@@ -306,7 +306,6 @@ function Move-SharedMailboxObjects {
     }
 }
 
-
 function Add-TervisMSOnlineAdminRoleMember {
     [CmdletBinding()]
     param (
@@ -331,3 +330,25 @@ function Add-TervisMSOnlineAdminRoleMember {
 
     Add-MsolRoleMember -RoleMemberEmailAddress $UserPrincipalName -RoleName $RoleName
 }
+
+# Do Not Use. New-TervisMSOLUser is not ready for use with current hybrid setup with on-promise Exchange2016.
+#function New-TervisMSOLUser{
+#    [CmdletBinding()]
+#    param(
+#        [paramete r(mandatory)]$Identity,
+#        [parameter(mandatory)]$AzureADConnectComputerName
+#    )
+#
+#    $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName,ProtectedFromAccidentalDeletion
+#    $DN = $UserObject | select -ExpandProperty DistinguishedName
+#    $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
+#
+#    Import-TervisMSOnlinePSSession
+#
+#    Enable-O365Mailbox -Identity $Identity -RoleAssignmentPolicy "Default Role Assignment Policy"
+#
+#    $Credential = Get-ExchangeOnlineCredential
+#    Connect-MsolService -Credential $Credential
+#    Write-Verbose "Adding the Users Office 365 Licenses"
+#    Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses "Office 365 Enterprise E3"
+#}
