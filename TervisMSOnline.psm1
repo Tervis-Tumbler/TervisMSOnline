@@ -49,11 +49,19 @@ function Import-TervisMSOnlinePSSession {
     Select -First 1
 
     if (-Not $Session) {
+        $FunctionInfo = Get-Command Get-O365Mailbox -ErrorAction SilentlyContinue
+        if ($FunctionInfo) {
+            Remove-Module -Name $FunctionInfo.ModuleName            
+        }
         Write-Verbose "Connect to Exchange Online"
         $Credential = Get-ExchangeOnlineCredential
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential -WarningAction SilentlyContinue 
     }
-    Import-PSSession $Session -Prefix "O365" -DisableNameChecking -AllowClobber | Out-Null
+
+    $FunctionInfo = Get-Command Get-O365Mailbox -ErrorAction SilentlyContinue
+    if (-not $FunctionInfo) {
+        Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -DisableNameChecking -Global -Prefix "O365"
+    }
 }
 
 function Get-ExchangeOnlineCredential {
