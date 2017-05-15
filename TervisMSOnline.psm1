@@ -45,7 +45,8 @@ function Import-TervisMSOnlinePSSession {
     Remove-PSSession
 
     $Session = $Sessions |
-    Where State -eq 'Opened'
+    Where State -eq "Opened" |
+    Select -First 1
 
     if (-Not $Session) {
         Write-Verbose "Connect to Exchange Online"
