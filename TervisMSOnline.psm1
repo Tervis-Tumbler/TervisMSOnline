@@ -16,7 +16,7 @@ function Test-TervisUserHasOnPremMailbox {
     param(
         [parameter(mandatory)]$Identity
     )
-    $WarningPreference = 'SilentlyContinue'
+    $WarningPreference = "SilentlyContinue"
     $OnPremSession = New-PSSession -Name OnPremSession -ConfigurationName Microsoft.Exchange -Authentication Kerberos -ConnectionUri http://exchange2016.tervis.prv/powershell
     
     Import-PSSession $OnPremSession -AllowClobber | Out-Null
@@ -35,21 +35,24 @@ function Import-TervisMSOnlinePSSession {
     [CmdletBinding()]
     param ()
     Write-Verbose "Connect to Exchange Online"
-    $Sessions = Get-PsSession
-    $Connected = $false
-    Foreach ($Session in $Sessions) {
-        if ($Session.ComputerName -eq 'ps.outlook.com' -and $Session.ConfigurationName -eq 'Microsoft.Exchange' -and $Session.State -eq 'Opened') {
-            $Connected = $true
-        } elseif ($Session.ComputerName -eq 'ps.outlook.com' -and $Session.ConfigurationName -eq 'Microsoft.Exchange' -and $Session.State -eq 'Broken') {
-            Remove-PSSession $Session
-        }
-    }
-    if ($Connected -eq $false) {
+
+    $Sessions = Get-PsSession |
+    Where ComputerName -eq "ps.outlook.com" |
+    Where ConfigurationName -eq "Microsoft.Exchange"
+    
+    $Sessions |
+    Where State -eq "Broken" |
+    Remove-PSSession
+
+    $Session = $Sessions |
+    State -eq 'Opened'
+
+    if (-Not $Session) {
         Write-Verbose "Connect to Exchange Online"
         $Credential = Get-ExchangeOnlineCredential
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential -WarningAction SilentlyContinue 
     }
-    Import-PSSession $Session -Prefix 'O365' -DisableNameChecking -AllowClobber | Out-Null
+    Import-PSSession $Session -Prefix "O365" -DisableNameChecking -AllowClobber | Out-Null
 }
 
 function Get-ExchangeOnlineCredential {
