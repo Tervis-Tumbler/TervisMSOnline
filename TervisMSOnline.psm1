@@ -45,7 +45,7 @@ function Import-TervisMSOnlinePSSession {
     Remove-PSSession
 
     $Session = $Sessions |
-    State -eq 'Opened'
+    Where State -eq 'Opened'
 
     if (-Not $Session) {
         Write-Verbose "Connect to Exchange Online"
@@ -247,7 +247,6 @@ CONFIDENTIALITY NOTICE: At Tervis we make great drinkware that helps people cele
 "@
 
     Send-TervisMailMessage -To $EmailAddressofSupervisor -From 'Help Desk Team <HelpDeskTeam@tervis.com>' -Subject 'Instructions to Add Shared Email to Outlook' -Body $HTMLBody -Attachments $Outlook2011Instructions, $Outlook2016Instructions -bodyashtml
-
 }
 
 function Move-SharedMailboxObjects {
