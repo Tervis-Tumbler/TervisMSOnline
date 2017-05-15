@@ -22,13 +22,11 @@ function Test-TervisUserHasOnPremMailbox {
     Import-PSSession $OnPremSession -AllowClobber | Out-Null
     
     if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
-        $OnPremMailbox = $true
+        $true
     }
     else {
-        $OnPremMailbox = $false    
+        $false    
     }
-    
-    $OnPremMailbox
     
     Remove-PSSession -Name OnPremSession
 }
