@@ -98,6 +98,7 @@ function Remove-TervisMobileDevice {
     Select-Object -ExpandProperty UserPrincipalName
 
     Get-O365MobileDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue | 
+    Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
     Remove-O365MobileDevice -Confirm:$false
 }
 
