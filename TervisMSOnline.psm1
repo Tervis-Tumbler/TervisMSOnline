@@ -1,45 +1,15 @@
 ﻿#Requires -Version 5
 
-Function Test-TervisUserHasMailbox {
-    param(
-        [parameter(mandatory)]$Identity
-    )
-    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $Credential = Get-ExchangeOnlineCredential
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-    Import-PSSession $Session -Prefix O365 -DisableNameChecking
-    $MsolMailbox = $false
-    $OnPremiseMailbox = $false
-    add-pssnapin Microsoft.Exchange.Management.PowerShell.E2010
-    if (Get-O365Mailbox $Identity -ErrorAction SilentlyContinue) {
-        $MsolMailbox = $true
-    } elseif (get-mailbox $Identity -ErrorAction SilentlyContinue){
-        $OnPremiseMailbox = $true
-    }
-}
-
 function Test-TervisUserHasMSOnlineMailbox {
     param(
         [parameter(mandatory)]$Identity
     )
-    write-verbose "Connect to Exchange Online with your user@domain.com credentials"
-    $WarningPreference = 'SilentlyContinue'
-    $Credential = Get-ExchangeOnlineCredential
-    $O365Session = New-PSSession -Name MSOnlineSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential
-    
-    Import-PSSession $O365Session -AllowClobber | Out-Null
-    
-    if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
-       $MsolMailbox = $true
-       
+    Import-TervisMSOnlinePSSession
+    if (Get-O365Mailbox $Identity -ErrorAction SilentlyContinue) {
+       $true       
     } else {
-        $MSolMailbox = $false    
+        $false    
     }
-    
-    $MsolMailbox
-    
-    Remove-PSSession -Name MSOnlineSession
-
 }
 
 function Test-TervisUserHasOnPremMailbox {
