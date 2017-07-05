@@ -281,8 +281,14 @@ function Move-SharedMailboxObjects {
 
     $SharedMailboxOnOffice365 = Get-O365Mailbox -RecipientTypeDetails 'Shared' -ResultSize 'Unlimited'
     foreach ($SharedMailbox in $SharedMailboxOnOffice365) {
-        [string]$UserName = ($SharedMailbox | Select -ExpandProperty UserPrincipalName).Split('@')[0]
-        Get-ADUser $UserName | Move-ADObject -TargetPath $DistinguishedNameOfTargetOU -Confirm:$false
+        [string]$UserName = $SharedMailbox | Select -ExpandProperty UserPrincipalName
+        $ADUser = Get-ADObject -Filter {UserPrincipalName -eq $UserName} 
+        if (-NOT ($ADUser.DistinguishedName -match $DistinguishedNameOfTargetOU)) {
+            $ADUser | Set-ADObject -ProtectedFromAccidentalDeletion $false
+            $ADUser | Move-ADObject -TargetPath $DistinguishedNameOfTargetOU -Confirm:$false
+            $ADUser = Get-ADObject -Filter {UserPrincipalName -eq $UserName} 
+            $ADUser | Set-ADObject -ProtectedFromAccidentalDeletion $true
+        }
     }
 }
 
