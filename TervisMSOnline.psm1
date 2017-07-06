@@ -302,7 +302,7 @@ function Install-MoveSharedMailboxObjectsScheduledTasks {
             Where DistinguishedName -match 'OU=Shared Mailbox,OU=Exchange,DC=' | `
             Select -ExpandProperty DistinguishedName
         $Execute = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
-        $Argument = "-Command {Move-SharedMailboxObjects -DistinguishedNameOfTargetOU $TargetOU} -NoProfile"
+        $Argument = "-Command `"& {Move-SharedMailboxObjects -DistinguishedNameOfTargetOU `'$TargetOU`'}`""
     }
     process {
         $CimSession = New-CimSession -ComputerName $ComputerName
