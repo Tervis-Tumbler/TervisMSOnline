@@ -292,6 +292,26 @@ function Move-SharedMailboxObjects {
     }
 }
 
+function Install-MoveSharedMailboxObjectsScheduledTasks {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstateCredential -PasswordID 259)
+        $TargetOU = Get-ADOrganizationalUnit -Filter {Name -eq "Shared Mailbox"} | `
+            Where DistinguishedName -match 'OU=Shared Mailbox,OU=Exchange,DC=' | `
+            Select -ExpandProperty DistinguishedName
+        $Execute = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+        $Argument = "-Command {Move-SharedMailboxObjects -DistinguishedNameOfTargetOU $TargetOU} -NoProfile"
+    }
+    process {
+        $CimSession = New-CimSession -ComputerName $ComputerName
+        If (-NOT (Get-ScheduledTask -TaskName Move-SharedMailboxObjects -CimSession $CimSession -ErrorAction SilentlyContinue)) {
+            Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName Move-SharedMailboxObjects -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt2am -ComputerName $ComputerName
+        }
+    }
+}
+
 function Add-TervisMSOnlineAdminRoleMember {
     [CmdletBinding()]
     param (
