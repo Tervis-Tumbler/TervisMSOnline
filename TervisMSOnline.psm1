@@ -31,6 +31,21 @@ function Test-TervisUserHasOnPremMailbox {
     Remove-PSSession -Name OnPremSession
 }
 
+function Test-TervisUserHasOffice365Mailbox {
+    param(
+        [parameter(mandatory)]$Identity
+    )
+    Import-TervisMSOnlinePSSession
+    
+    $UserPrincipalName = Get-ADUser -Identity $Identity | Select -ExpandProperty UserPrincipalName
+    if (Get-0365Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
+        $true
+    }
+    else {
+        $false    
+    }
+}
+
 function Import-TervisMSOnlinePSSession {
     [CmdletBinding()]
     param ()
