@@ -352,6 +352,24 @@ function Add-TervisMSOnlineAdminRoleMember {
     Add-MsolRoleMember -RoleMemberEmailAddress $UserPrincipalName -RoleName $RoleName
 }
 
+function Set-DTCNewHireO365MailboxPermissionsMirroringPcovington{
+    param(
+    	[cmdletbinding()]
+        [parameter()]$UserToMirror = "pcovington",
+        [parameter(mandatory)]$User
+    )
+
+    $Mailboxes = Get-O365Mailbox | Get-O365MailboxPermission -User $UserToMirror
+    $MailboxIdentities = $Mailboxes.identity
+#    $Users = "kscott","pkaiser","kvazquez","nwieland","cbanks"
+#    foreach ($User in $Users){
+#        foreach ($MailboxIdentity in $MailboxIdentities){
+            Add-O365MailboxPermission -Identity $MailboxIdentity -User $User -AccessRights "FullAccess"
+            Add-O365RecipientPermission $MailboxIdentity -AccessRights SendAs -Trustee $User -Confirm:$false
+#        }
+#    }
+}
+
 # Do Not Use. New-TervisMSOLUser is not ready for use with current hybrid setup with on-promise Exchange2016.
 #function New-TervisMSOLUser{
 #    [CmdletBinding()]
