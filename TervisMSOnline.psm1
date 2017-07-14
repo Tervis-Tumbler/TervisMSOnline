@@ -358,6 +358,7 @@ function Set-DTCNewHireO365MailboxPermissionsMirroringPcovington{
         [parameter(mandatory)]$UserToMirror,
         [parameter(mandatory)]$User
     )
+    Import-TervisMSOnlinePSSession
 
     $Mailboxes = Get-O365Mailbox | Get-O365MailboxPermission -User $UserToMirror
     $MailboxIdentities = $Mailboxes.identity
