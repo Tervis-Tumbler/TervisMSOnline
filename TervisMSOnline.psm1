@@ -355,7 +355,7 @@ function Add-TervisMSOnlineAdminRoleMember {
 function Set-DTCNewHireO365MailboxPermissionsMirroringPcovington{
     param(
     	[cmdletbinding()]
-        [parameter()]$UserToMirror = "pcovington",
+        [parameter(mandatory)]$UserToMirror,
         [parameter(mandatory)]$User
     )
 
