@@ -46,6 +46,21 @@ function Test-TervisUserHasOffice365Mailbox {
     }
 }
 
+function Test-TervisUserHasOffice365SharedMailbox {
+    param(
+        [parameter(mandatory)]$Identity
+    )
+    Import-TervisMSOnlinePSSession
+    
+    $UserPrincipalName = Get-ADUser -Identity $Identity | Select -ExpandProperty UserPrincipalName
+    if (Get-O365Mailbox $UserPrincipalName -RecipientTypeDetails Shared -ErrorAction SilentlyContinue) {
+        $true
+    }
+    else {
+        $false    
+    }
+}
+
 function Import-TervisMSOnlinePSSession {
     [CmdletBinding()]
     param ()
