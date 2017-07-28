@@ -38,7 +38,7 @@ function Test-TervisUserHasOffice365Mailbox {
     Import-TervisMSOnlinePSSession
     
     $UserPrincipalName = Get-ADUser -Identity $Identity | Select -ExpandProperty UserPrincipalName
-    if (Get-0365Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
+    if (Get-O365Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
         $true
     }
     else {
