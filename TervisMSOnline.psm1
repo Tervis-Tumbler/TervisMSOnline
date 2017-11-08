@@ -120,10 +120,10 @@ function Set-TervisMSOLUserLicense {
             Throw "There are not any $License licenses available to assign to this user."
         }
 
-        $License = $AvailableLicenses | Select -ExpandProperty AccountSkuId
+        $AccountSkuId = $AvailableLicenses | Select -ExpandProperty AccountSkuId
 
         Set-MsolUser -UserPrincipalName $UserPrincipalName -UsageLocation 'US'
-        Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $License
+        Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $AccountSkuId
     }
 }
 
