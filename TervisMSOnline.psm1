@@ -64,7 +64,6 @@ function Test-TervisUserHasOffice365SharedMailbox {
 function Import-TervisMSOnlinePSSession {
     [CmdletBinding()]
     param ()
-    Write-Verbose "Connect to Exchange Online"
 
     $Sessions = Get-PsSession |
     Where ComputerName -eq "ps.outlook.com" |
@@ -94,8 +93,36 @@ function Import-TervisMSOnlinePSSession {
     }
 }
 
+function Connect-TervisMsolService {
+    $Office365Credential = Get-ExchangeOnlineCredential
+    Connect-MsolService -Credential $Office365Credential
+}
+
 function Get-ExchangeOnlineCredential {
     Import-Clixml $env:USERPROFILE\ExchangeOnlineCredential.txt
+}
+
+function Set-TervisMSOLUserLicense {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName,
+        [ValidateSet("E3","E1")][Parameter(Mandatory)]$License
+    )
+        $AccountSkuIDPattern = if ($License -eq "E3") { 
+            "*ENTERPRISEPACK" 
+        } elseif ($License -eq "E1") { 
+            "*STANDARDPACK" 
+        }
+
+        $AvailableLicenses = Get-MsolAccountSku | Where {$_.AccountSkuID -like $AccountSkuIDPattern}
+            
+        if ($AvailableLicenses.ConsumedUnits -ge $AvailableLicenses.ActiveUnits) {
+            Throw "There are not any $License licenses available to assign to this user."
+        }
+
+        $License = $AvailableLicenses | Select -ExpandProperty AccountSkuId
+
+        Set-MsolUser -UserPrincipalName $UserPrincipalName -UsageLocation 'US'
+        Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $License
 }
 
 function Set-ExchangeOnlineCredential {
