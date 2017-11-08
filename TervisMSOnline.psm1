@@ -107,6 +107,7 @@ function Set-TervisMSOLUserLicense {
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName,
         [ValidateSet("E3","E1")][Parameter(Mandatory)]$License
     )
+    process {
         $AccountSkuIDPattern = if ($License -eq "E3") { 
             "*ENTERPRISEPACK" 
         } elseif ($License -eq "E1") { 
@@ -123,6 +124,7 @@ function Set-TervisMSOLUserLicense {
 
         Set-MsolUser -UserPrincipalName $UserPrincipalName -UsageLocation 'US'
         Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $License
+    }
 }
 
 function Set-ExchangeOnlineCredential {
