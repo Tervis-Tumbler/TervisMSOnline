@@ -108,22 +108,43 @@ function Set-TervisMSOLUserLicense {
         [ValidateSet("E3","E1")][Parameter(Mandatory)]$License
     )
     process {
-        $AccountSkuIDPattern = if ($License -eq "E3") { 
-            "*ENTERPRISEPACK" 
-        } elseif ($License -eq "E1") { 
-            "*STANDARDPACK" 
-        }
+        Connect-TervisMsolService
+        
+        $EnterprisePackSKU = Get-MsolAccountSku | 
+        Where-Object {$_.AccountSkuID -match "ENTERPRISEPACK"} |
+        Select-Object -ExpandProperty AccountSkuID
 
-        $AvailableLicenses = Get-MsolAccountSku | Where {$_.AccountSkuID -like $AccountSkuIDPattern}
+        $StandardPackSKU = Get-MsolAccountSku | 
+        Where-Object {$_.AccountSkuID -match "STANDARDPACK"} |
+        Select-Object -ExpandProperty AccountSkuID
+
+        if ($License -eq "E3") { 
+            $PackSkuToAdd = $EnterprisePackSKU
+            $PackSkuToRemove = $StandardPackSKU
+        } elseif ($License -eq "E1") { 
+            $PackSkuToAdd = $StandardPackSKU
+            $PackSkuToRemove = $EnterprisePackSKU
+        }
+        
+        $AvailableLicenses = Get-MsolAccountSku | Where AccountSkuID -eq $PackSkuToAdd
             
         if ($AvailableLicenses.ConsumedUnits -ge $AvailableLicenses.ActiveUnits) {
             Throw "There are not any $License licenses available to assign to this user."
         }
 
-        $AccountSkuId = $AvailableLicenses | Select -ExpandProperty AccountSkuId
-
-        Set-MsolUser -UserPrincipalName $UserPrincipalName -UsageLocation 'US'
-        Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $AccountSkuId
+        $MSOLUser = Get-MsolUser -UserPrincipalName $UserPrincipalName
+        
+        $CurrentLicenses = $MSOLUser.Licenses |
+        where AccountSkuID -in $EnterprisePackSKU,$StandardPackSKU
+        
+        if ($CurrentLicenses -notcontains $PackSkuToAdd) {
+            Set-MsolUser -UserPrincipalName $UserPrincipalName -UsageLocation 'US'
+            Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $PackSkuToAdd
+        }
+        
+        if ($CurrentLicenses -contains $PackSkuToRemove) {
+            Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -RemoveLicenses $PackSkuToRemove
+        }
     }
 }
 
