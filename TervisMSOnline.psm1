@@ -492,9 +492,18 @@ function Disable-Office365MultiFactorAuthentication {
 }
 
 function Get-MsolUsersWithAnE1OrE3LicenseExcludingServiceAccounts {
+    param (
+        [Switch]$ExcludeUsersWithStrongAuthenticationEnforced
+    )
     Connect-TervisMsolService
-    $AllMSOL = Get-MsolUser -All
-    $AllMSOL | 
+    $AllMSOL = Get-MsolUser -All #| select DisplayName, UserPrincipalName, Licenses, StrongAuthenticationRequirements
+    if ($ExcludeUsersWithStrongAuthenticationEnforced) {
+        $MSOLUsersToFilter = $AllMSOL | where {$_.StrongAuthenticationRequirements.State -NE "Enforced"}
+    } else {
+        $MSOLUsersToFilter = $AllMSOL
+    }
+
+    $MSOLUsersToFilter | 
         where {
             $_.licenses.AccountSkuID -match "tervis0:ENTERPRISEPACK" -or
             $_.licenses.AccountSkuID -match "tervis0:STANDARDPACK"
