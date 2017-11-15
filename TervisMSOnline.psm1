@@ -512,3 +512,21 @@ function Get-MsolUsersWithAnE1OrE3LicenseExcludingServiceAccounts {
         sort DisplayName | 
         select DisplayName, UserPrincipalName, Licenses
 }
+
+function Get-MsolUsersWithStrongAuthenticationNotConfigured {
+    Connect-TervisMsolService
+    $AllMsolUsers = Get-MsolUser -All | 
+        where {
+            $_.licenses.AccountSkuID -match "tervis0:ENTERPRISEPACK" -or
+            $_.licenses.AccountSkuID -match "tervis0:STANDARDPACK"
+        } | 
+        where UserPrincipalName -NotMatch TTC_
+    $MsolUsersWithStrongAuthenticationConfigured = $AllMsolUsers | where {$_.StrongAuthenticationMethods -ne $null}
+    $MsolUsersWithStrongAuthenticationNotConfigured = $AllMsolUsers | where {$_.StrongAuthenticationMethods -eq $null}
+    $MsolUsersWithStrongAuthenticationNotConfigured
+
+    $AllUserCount = $AllMsolUsers.Count
+    $ConfiguredUserCount = $MsolUsersWithStrongAuthenticationConfigured.Count
+    $PercentageConfigured = "{0:N2}" -f ($ConfiguredUserCount * 100/$AllUserCount)
+    Write-Warning "`nUsers with MFA configured:`t`t$ConfiguredUserCount`nTotal number of users:`t`t`t$AllUserCount`nPercent with MFA configured:`t$PercentageConfigured"
+}
