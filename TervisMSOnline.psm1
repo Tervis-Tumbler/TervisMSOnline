@@ -218,9 +218,8 @@ function Remove-TervisMSOLUser{
     if ($IdentityOfUserToReceiveAccessToRemovedUsersMailbox) {
         Add-O365MailboxPermission -Identity $UserPrincipalName -User $IdentityOfUserToReceiveAccessToRemovedUsersMailbox -AccessRights FullAccess -InheritanceType All -AutoMapping:$true | Out-Null
     }
-
-    $Credential = Get-ExchangeOnlineCredential
-    Connect-MsolService -Credential $Credential
+    
+    Connect-TervisMsolService
     Write-Verbose "Removing the Users Office 365 Licenses"
     $Licenses = Get-MsolUser -UserPrincipalName $UserPrincipalName |
         select -ExpandProperty Licenses | 
