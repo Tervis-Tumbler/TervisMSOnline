@@ -491,7 +491,7 @@ function Disable-Office365MultiFactorAuthentication {
     }
 }
 
-function Get-AllMsolUsersWithAnE1OrE3License {
+function Get-MsolUsersWithAnE1OrE3LicenseExcludingServiceAccounts {
     Connect-TervisMsolService
     $AllMSOL = Get-MsolUser -All
     $AllMSOL | 
@@ -499,6 +499,7 @@ function Get-AllMsolUsersWithAnE1OrE3License {
             $_.licenses.AccountSkuID -match "tervis0:ENTERPRISEPACK" -or
             $_.licenses.AccountSkuID -match "tervis0:STANDARDPACK"
         } | 
+        where UserPrincipalName -NotMatch TTC_ |
         sort DisplayName | 
         select DisplayName, UserPrincipalName, Licenses
 }
