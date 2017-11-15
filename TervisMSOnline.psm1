@@ -468,3 +468,18 @@ function Enable-Office365MultiFactorAuthentication {
 
     Set-MsolUser -UserPrincipalName $UserPrincipalName -StrongAuthenticationRequirements $auth
 }
+
+function Disable-Office365MultiFactorAuthentication {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName
+    )
+    
+    Connect-TervisMsolService
+    
+    $auth = New-Object -TypeName Microsoft.Online.Administration.StrongAuthenticationRequirement
+    $auth.RelyingParty = "*"
+    $auth.State = "Disabled"
+    $auth.RememberDevicesNotIssuedBefore = (Get-Date)
+
+    Set-MsolUser -UserPrincipalName $UserPrincipalName -StrongAuthenticationRequirements $auth
+}
