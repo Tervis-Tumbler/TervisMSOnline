@@ -453,3 +453,18 @@ function Set-DTCNewHireO365MailboxPermissions{
 #    Write-Verbose "Adding the Users Office 365 Licenses"
 #    Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses "Office 365 Enterprise E3"
 #}
+
+function Enable-Office365MultiFactorAuthentication {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName
+    )
+    
+    Connect-TervisMsolService
+    
+    $auth = New-Object -TypeName Microsoft.Online.Administration.StrongAuthenticationRequirement
+    $auth.RelyingParty = "*"
+    $auth.State = "Enforced"
+    $auth.RememberDevicesNotIssuedBefore = (Get-Date)
+
+    Set-MsolUser -UserPrincipalName $UserPrincipalName -StrongAuthenticationRequirements $auth
+}
