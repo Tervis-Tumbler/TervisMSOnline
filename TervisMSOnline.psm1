@@ -414,8 +414,8 @@ function Add-TervisMSOnlineAdminRoleMember {
         "User Account Administrator"
         )]$RoleName
     )
-    $Credential = Get-ExchangeOnlineCredential
-    Connect-MsolService -Credential $Credential
+    
+    Connect-TervisMsolService
 
     Add-MsolRoleMember -RoleMemberEmailAddress $UserPrincipalName -RoleName $RoleName
 }
