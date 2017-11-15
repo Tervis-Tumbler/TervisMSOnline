@@ -459,7 +459,7 @@ function Enable-Office365MultiFactorAuthentication {
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName
     )
     
-    Connect-TervisMsolService
+    #Connect-TervisMsolService
     
     $auth = New-Object -TypeName Microsoft.Online.Administration.StrongAuthenticationRequirement
     $auth.RelyingParty = "*"
@@ -474,7 +474,7 @@ function Disable-Office365MultiFactorAuthentication {
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName
     )
     
-    Connect-TervisMsolService
+    #Connect-TervisMsolService
     
     $auth = New-Object -TypeName Microsoft.Online.Administration.StrongAuthenticationRequirement
     $auth.RelyingParty = "*"
