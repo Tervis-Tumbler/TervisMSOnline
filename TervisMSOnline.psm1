@@ -94,8 +94,12 @@ function Import-TervisMSOnlinePSSession {
 }
 
 function Connect-TervisMsolService {
-    $Office365Credential = Get-ExchangeOnlineCredential
-    Connect-MsolService -Credential $Office365Credential
+    try {
+        Get-MsolDomain -ErrorAction Stop | Out-Null
+    }
+    catch {
+        Connect-MsolService
+    }
 }
 
 function Get-ExchangeOnlineCredential {
