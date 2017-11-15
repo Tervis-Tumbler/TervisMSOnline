@@ -496,7 +496,7 @@ function Get-MsolUsersWithAnE1OrE3LicenseExcludingServiceAccounts {
         [Switch]$ExcludeUsersWithStrongAuthenticationEnforced
     )
     Connect-TervisMsolService
-    $AllMSOL = Get-MsolUser -All #| select DisplayName, UserPrincipalName, Licenses, StrongAuthenticationRequirements
+    $AllMSOL = Get-MsolUser -All
     if ($ExcludeUsersWithStrongAuthenticationEnforced) {
         $MSOLUsersToFilter = $AllMSOL | where {$_.StrongAuthenticationRequirements.State -NE "Enforced"}
     } else {
