@@ -530,3 +530,27 @@ function Get-MsolUsersWithStrongAuthenticationNotConfigured {
     $PercentageConfigured = "{0:N2}" -f ($ConfiguredUserCount * 100/$AllUserCount)
     Write-Warning "`nUsers with MFA configured:`t`t$ConfiguredUserCount`nTotal number of users:`t`t`t$AllUserCount`nPercent with MFA configured:`t$PercentageConfigured"
 }
+
+
+function Get-ExoPSSessionScriptPath {
+    $RootPath = "$env:LOCALAPPDATA\Apps\2.0"
+    $ExoScriptName = "CreateExoPSSession.ps1"
+    $DllItemName = "Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
+    $ExoScriptItems = Get-ChildItem -Path $RootPath -Name $ExoScriptName -Recurse
+    $DllItems = Get-ChildItem -Path $RootPath -Name $DllItemName -Recurse
+
+    foreach ($ExoScriptItem in $ExoScriptItems) {
+        foreach ($DllItem in $DllItems) {
+            if (($ExoScriptItem | Split-Path -Parent) -eq ($DllItem | Split-Path -Parent)) {
+                $RealScriptItem = $ExoScriptItem
+                break;
+            }
+        }
+    }
+    "$RootPath\$RealScriptItem"
+}
+
+function Import-TervisExoPSSession {
+    $ExoScriptPath = Get-ExoPSSessionScriptPath
+    & $ExoScriptPath
+}
