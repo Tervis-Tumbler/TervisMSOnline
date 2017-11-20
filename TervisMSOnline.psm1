@@ -1,51 +1,5 @@
 ﻿#Requires -Version 5
 
-function Test-TervisUserHasMSOnlineMailbox {
-    param(
-        [parameter(mandatory)]$Identity
-    )
-    Import-TervisMSOnlinePSSession
-    if (Get-O365Mailbox $Identity -ErrorAction SilentlyContinue) {
-       $true       
-    } else {
-        $false    
-    }
-}
-
-function Test-TervisUserHasOnPremMailbox {
-    param(
-        [parameter(mandatory)]$Identity
-    )
-    $WarningPreference = "SilentlyContinue"
-    $OnPremSession = New-PSSession -Name OnPremSession -ConfigurationName Microsoft.Exchange -Authentication Kerberos -ConnectionUri http://exchange2016.tervis.prv/powershell
-    
-    Import-PSSession $OnPremSession -AllowClobber | Out-Null
-    
-    if (Get-Mailbox $Identity -ErrorAction SilentlyContinue) {
-        $true
-    }
-    else {
-        $false    
-    }
-    
-    Remove-PSSession -Name OnPremSession
-}
-
-function Test-TervisUserHasOffice365Mailbox {
-    param(
-        [parameter(mandatory)]$Identity
-    )
-    Import-TervisMSOnlinePSSession
-    
-    $UserPrincipalName = Get-ADUser -Identity $Identity | Select -ExpandProperty UserPrincipalName
-    if (Get-O365Mailbox $UserPrincipalName -ErrorAction SilentlyContinue) {
-        $true
-    }
-    else {
-        $false    
-    }
-}
-
 function Test-TervisUserHasOffice365SharedMailbox {
     param(
         [parameter(mandatory)]$Identity
