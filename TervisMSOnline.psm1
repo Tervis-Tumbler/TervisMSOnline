@@ -75,7 +75,7 @@ function Import-TervisEXOPSSession {
     if (-Not $Session) {
         $ExoScriptPath = Get-ExoPSSessionScriptPath
         Import-Module $ExoScriptPath
-        Connect-EXOPSSession -UserPrincipalName $UserPrincipalName
+        Connect-EXOPSSession -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com"
 
         $Session = Get-PsSession |
         Where ComputerName -eq "outlook.office365.com" |
@@ -192,11 +192,10 @@ function Remove-TervisMobileDevice {
     Remove-O365MobileDevice -Confirm:$false
 }
 
-function Remove-TervisMSOLUser{
+function Remove-TervisMSOLUser {
     [CmdletBinding()]
     param(
         [parameter(mandatory)]$Identity,
-        [parameter(mandatory)]$AzureADConnectComputerName,
         $IdentityOfUserToReceiveAccessToRemovedUsersMailbox
     )
 
