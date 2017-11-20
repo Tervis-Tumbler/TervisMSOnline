@@ -93,6 +93,56 @@ function Import-TervisMSOnlinePSSession {
     }
 }
 
+function Connect-TervisEXOPSSession {
+
+
+
+
+
+}
+
+function Import-TervisEXOPSSession {
+    [CmdletBinding()]
+    param ()
+        $ConnectionUri = 'https://outlook.office365.com/PowerShell-LiveId'
+        $AzureADAuthorizationEndpointUri = 'https://login.windows.net/common'
+        Import-Module "C:\Users\cmagnuson\AppData\Local\Apps\2.0\LNKKYJHY.0E7\V0A8QRL2.OGG\micr..dule_31bf3856ad364e35_0010.0000_none_e092d310eab729ab\Microsoft.Exchange.Management.ExoPowershellModule.dll"
+        Add-Type -Name Microsoft.IdentityModel.Clients.ActiveDirectory
+        add-type -Path "C:\Users\cmagnuson\OneDrive - tervis.com\Desktop\Brocken exchange pssession\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
+        $PSSession = New-ExoPSSession -UserPrincipalName $UserPrincipalName -ConnectionUri $ConnectionUri -AzureADAuthorizationEndpointUri $AzureADAuthorizationEndpointUri -Credential $Credential
+
+    import-module -force "C:\Users\cmagnuson\AppData\Local\Apps\2.0\LNKKYJHY.0E7\V0A8QRL2.OGG\micr..dule_31bf3856ad364e35_0010.0000_none_e092d310eab729ab\Microsoft.Exchange.Management.ExoPowershellModule.dll"
+
+
+    $Sessions = Get-PsSession |
+    Where ComputerName -eq "ps.outlook.com" |
+    Where ConfigurationName -eq "Microsoft.Exchange"
+    
+    $Sessions |
+    Where State -eq "Broken" |
+    Remove-PSSession
+
+    $Session = $Sessions |
+    Where State -eq "Opened" |
+    Select -First 1
+
+    if (-Not $Session) {
+        $FunctionInfo = Get-Command Get-O365Mailbox -ErrorAction SilentlyContinue
+        if ($FunctionInfo) {
+            Remove-Module -Name $FunctionInfo.ModuleName            
+        }
+        Write-Verbose "Connect to Exchange Online"
+        $Credential = Get-ExchangeOnlineCredential
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential -WarningAction SilentlyContinue 
+    }
+
+    $FunctionInfo = Get-Command Get-O365Mailbox -ErrorAction SilentlyContinue
+    if (-not $FunctionInfo) {
+        Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -DisableNameChecking -Global -Prefix "O365"
+    }
+}
+
+
 function Connect-TervisMsolService {
     try {
         Get-MsolDomain -ErrorAction Stop | Out-Null
@@ -199,10 +249,8 @@ function Remove-TervisMSOLUser{
     [CmdletBinding()]
     param(
         [parameter(mandatory)]$Identity,
-        [parameter(mandatory)]$AzureADConnectComputerName,
         $IdentityOfUserToReceiveAccessToRemovedUsersMailbox
     )
-
     $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName,ProtectedFromAccidentalDeletion
     $DN = $UserObject | select -ExpandProperty DistinguishedName
     $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
@@ -511,46 +559,4 @@ function Get-MsolUsersWithAnE1OrE3LicenseExcludingServiceAccounts {
         where UserPrincipalName -NotMatch TTC_ |
         sort DisplayName | 
         select DisplayName, UserPrincipalName, Licenses
-}
-
-function Get-MsolUsersWithStrongAuthenticationNotConfigured {
-    Connect-TervisMsolService
-    $AllMsolUsers = Get-MsolUser -All | 
-        where {
-            $_.licenses.AccountSkuID -match "tervis0:ENTERPRISEPACK" -or
-            $_.licenses.AccountSkuID -match "tervis0:STANDARDPACK"
-        } | 
-        where UserPrincipalName -NotMatch TTC_
-    $MsolUsersWithStrongAuthenticationConfigured = $AllMsolUsers | where {$_.StrongAuthenticationMethods -ne $null}
-    $MsolUsersWithStrongAuthenticationNotConfigured = $AllMsolUsers | where {$_.StrongAuthenticationMethods -eq $null}
-    $MsolUsersWithStrongAuthenticationNotConfigured
-
-    $AllUserCount = $AllMsolUsers.Count
-    $ConfiguredUserCount = $MsolUsersWithStrongAuthenticationConfigured.Count
-    $PercentageConfigured = "{0:N2}" -f ($ConfiguredUserCount * 100/$AllUserCount)
-    Write-Warning "`nUsers with MFA configured:`t`t$ConfiguredUserCount`nTotal number of users:`t`t`t$AllUserCount`nPercent with MFA configured:`t$PercentageConfigured"
-}
-
-
-function Get-ExoPSSessionScriptPath {
-    $RootPath = "$env:LOCALAPPDATA\Apps\2.0"
-    $ExoScriptName = "CreateExoPSSession.ps1"
-    $DllItemName = "Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
-    $ExoScriptItems = Get-ChildItem -Path $RootPath -Name $ExoScriptName -Recurse
-    $DllItems = Get-ChildItem -Path $RootPath -Name $DllItemName -Recurse
-
-    foreach ($ExoScriptItem in $ExoScriptItems) {
-        foreach ($DllItem in $DllItems) {
-            if (($ExoScriptItem | Split-Path -Parent) -eq ($DllItem | Split-Path -Parent)) {
-                $RealScriptItem = $ExoScriptItem
-                break;
-            }
-        }
-    }
-    "$RootPath\$RealScriptItem"
-}
-
-function Import-TervisExoPSSession {
-    $ExoScriptPath = Get-ExoPSSessionScriptPath
-    . $ExoScriptPath
 }
