@@ -57,7 +57,19 @@ function Test-TervisUserHasOffice365SharedMailbox {
         $true
     }
     else {
-        $false    
+        $false
+    }
+}
+
+function Import-TervisOffice365ExchangePSSession {
+    Connect-TervisMsolService
+    $MSOLUser = Get-MsolUser -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com"
+    
+    if ($MSOLUser.StrongAuthenticationRequirements -and $MSOLUser.StrongAuthenticationRequirements.State -ne "Disabled") {
+        Import-TervisEXOPSSession
+    } 
+    else {
+        Import-TervisMSOnlinePSSession
     }
 }
 
@@ -87,6 +99,37 @@ function Import-TervisMSOnlinePSSession {
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -Authentication Basic -ConnectionUri https://ps.outlook.com/powershell -AllowRedirection:$true -Credential $credential -WarningAction SilentlyContinue 
     }
 
+    $FunctionInfo = Get-Command Get-O365Mailbox -ErrorAction SilentlyContinue
+    if (-not $FunctionInfo) {
+        Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -DisableNameChecking -Global -Prefix "O365"
+    }
+}
+
+function Import-TervisEXOPSSession {
+    $Sessions = Get-PsSession |
+    Where ComputerName -eq "outlook.office365.com" |
+    Where ConfigurationName -eq "Microsoft.Exchange"
+    
+    $Sessions |
+    Where State -eq "Broken" |
+    Remove-PSSession
+
+    $Session = $Sessions |
+    Where State -eq "Opened" |
+    Select -First 1
+
+    if (-Not $Session) {
+        $ExoScriptPath = Get-ExoPSSessionScriptPath
+        Import-Module $ExoScriptPath
+        Connect-EXOPSSession -UserPrincipalName $UserPrincipalName
+
+        $Session = Get-PsSession |
+        Where ComputerName -eq "outlook.office365.com" |
+        Where ConfigurationName -eq "Microsoft.Exchange" |
+        Where State -eq "Opened" |
+        Select -First 1
+    }
+    
     $FunctionInfo = Get-Command Get-O365Mailbox -ErrorAction SilentlyContinue
     if (-not $FunctionInfo) {
         Import-Module (Import-PSSession $Session -DisableNameChecking -AllowClobber) -DisableNameChecking -Global -Prefix "O365"
@@ -550,7 +593,7 @@ function Get-ExoPSSessionScriptPath {
     "$RootPath\$RealScriptItem"
 }
 
-function Import-TervisExoPSSession {
+function Invoke-ExoPSSessionScript {
     $ExoScriptPath = Get-ExoPSSessionScriptPath
     . $ExoScriptPath
 }
