@@ -4,7 +4,7 @@ function Test-TervisUserHasOffice365SharedMailbox {
     param(
         [parameter(mandatory)]$Identity
     )
-    Import-TervisMSOnlinePSSession
+    Import-TervisOffice365ExchangePSSession
     
     $UserPrincipalName = Get-ADUser -Identity $Identity | Select -ExpandProperty UserPrincipalName
     if (Get-O365Mailbox $UserPrincipalName -RecipientTypeDetails Shared -ErrorAction SilentlyContinue) {
