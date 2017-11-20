@@ -181,7 +181,7 @@ function Remove-TervisMobileDevice {
     param(
         [parameter(mandatory)]$Identity
     )
-    Import-TervisMSOnlinePSSession
+    Import-TervisOffice365ExchangePSSession
     Write-Verbose "Office 365 Removing Mobile Devices"    
     
     $UserPrincipalName = Get-ADUser -Identity $Identity -properties UserPrincipalName -ErrorAction SilentlyContinue |
@@ -204,7 +204,7 @@ function Remove-TervisMSOLUser{
     $DN = $UserObject | select -ExpandProperty DistinguishedName
     $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
 
-    Import-TervisMSOnlinePSSession
+    Import-TervisOffice365ExchangePSSession
 
     Remove-TervisMobileDevice -Identity $Identity
 
@@ -422,7 +422,7 @@ function Set-DTCNewHireO365MailboxPermissions{
     	[cmdletbinding()]
         [parameter(mandatory)]$User
     )
-    Import-TervisMSOnlinePSSession
+    Import-TervisOffice365ExchangePSSession
     
     $Mailboxes = "customercare","weborderstatus","webreturns","customyzer"
     
