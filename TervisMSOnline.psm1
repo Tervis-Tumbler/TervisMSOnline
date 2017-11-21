@@ -75,7 +75,7 @@ function Import-TervisEXOPSSession {
     if (-Not $Session) {
         $ExoScriptPath = Get-ExoPSSessionScriptPath
         Import-Module $ExoScriptPath
-        Connect-EXOPSSession -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com"
+        Connect-EXOPSSession -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com" | Out-Null
 
         $Session = Get-PsSession |
         Where ComputerName -eq "outlook.office365.com" |
