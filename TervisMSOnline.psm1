@@ -158,7 +158,7 @@ function Set-ExchangeOnlineCredential {
 
 function Install-TervisMSOnline {
     param(
-        [System.Management.Automation.PSCredential]$ExchangeOnlineCredential = $(get-credential -message "Please supply the credentials to access ExchangeOnline. Username must be in the form UserName@Domain.com")
+        [System.Management.Automation.PSCredential]$ExchangeOnlineCredential
     )
     <# 
     You must install the "Microsoft Online Services Sign-In Assistant for IT Professionals RTW" and 
@@ -167,13 +167,18 @@ function Install-TervisMSOnline {
     http://go.microsoft.com/fwlink/?LinkID=286152
     http://go.microsoft.com/fwlink/p/?linkid=236297
     #>
+    if (-not $ExchangeOnlineCredential) {
+        get-credential -message "Please supply the credentials to access ExchangeOnline. Username must be in the form UserName@Domain.com"
+    }
 
-    Set-ExchangeOnlineCredential -Credential $ExchangeOnlineCredential 
-    Write-Verbose -Message "Installing Microsoft Online Services Sign-In Assistant for IT Professionals RTW..."
-    Install-TervisChocolateyPackageInstall -PackageName msonline-signin-assistant
+    Install-Module -Name MSOnline
+    # Below is depricated but we haven't figured out all the correct versions of things currently
+    # Set-ExchangeOnlineCredential -Credential $ExchangeOnlineCredential 
+    # Write-Verbose -Message "Installing Microsoft Online Services Sign-In Assistant for IT Professionals RTW..."
+    # Install-TervisChocolateyPackageInstall -PackageName msonline-signin-assistant
     
-    Write-Verbose -Message "Installing Azure Active Directory Module for Windows PowerShell (64-bit version)..."
-    Install-TervisChocolateyPackageInstall -PackageName azure-ad-powershell-module
+    # Write-Verbose -Message "Installing Azure Active Directory Module for Windows PowerShell (64-bit version)..."
+    # Install-TervisChocolateyPackageInstall -PackageName azure-ad-powershell-module
 }
 
 function Remove-TervisMobileDevice {
