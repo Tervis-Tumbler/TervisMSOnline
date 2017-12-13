@@ -136,14 +136,14 @@ function Set-TervisMSOLUserLicense {
         $MSOLUser = Get-MsolUser -UserPrincipalName $UserPrincipalName
         
         $CurrentLicenses = $MSOLUser.Licenses |
-        where AccountSkuID -in $EnterprisePackSKU,$StandardPackSKU
+        Where-Object AccountSkuID -in $EnterprisePackSKU,$StandardPackSKU
         
-        if ($CurrentLicenses -notcontains $PackSkuToAdd) {
+        if ($CurrentLicenses.AccountSkuId -notcontains $PackSkuToAdd) {
             Set-MsolUser -UserPrincipalName $UserPrincipalName -UsageLocation 'US'
             Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses $PackSkuToAdd
         }
         
-        if ($CurrentLicenses -contains $PackSkuToRemove) {
+        if ($CurrentLicenses.AccountSkuId -contains $PackSkuToRemove) {
             Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -RemoveLicenses $PackSkuToRemove
         }
     }
