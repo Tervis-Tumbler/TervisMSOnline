@@ -436,6 +436,44 @@ function Set-DTCNewHireO365MailboxPermissions{
     }
 }
 
+function Add-TervisO365MailboxPermission{
+    param(
+        [cmdletbinding()]
+        [parameter(Mandatory)]$User,
+        [parameter(Mandatory)]$Mailbox,
+        [ValidateSet("FullAccess","SendAs","FullAccessAndSendAs")][parameter(Mandatory)]$Permission
+    )
+    Import-TervisOffice365ExchangePSSession
+
+    if ($Permission -eq "FullAccess"){
+        Add-O365MailboxPermission -Identity $Mailbox -User $User -AccessRights "FullAccess"
+    } elseif ($Permission -eq "SendAs"){
+        Add-O365RecipientPermission -Identity $Mailbox -AccessRights SendAs -Trustee $User -Confirm:$false
+    } elseif ($Permission -eq "FullAccessAndSendAs") {
+        Add-O365MailboxPermission -Identity $Mailbox -User $User -AccessRights "FullAccess"
+        Add-O365RecipientPermission -Identity $Mailbox -AccessRights SendAs -Trustee $User -Confirm:$false
+    }
+}
+
+function Remove-TervisO365MailboxPermission{
+    param(
+        [cmdletbinding()]
+        [parameter(Mandatory)]$User,
+        [parameter(Mandatory)]$Mailbox,
+        [ValidateSet("FullAccess","SendAs","FullAccessAndSendAs")][parameter(Mandatory)]$Permission
+    )
+    Import-TervisOffice365ExchangePSSession
+
+    if ($Permission -eq "FullAccess"){
+        Remove-O365MailboxPermission -Identity $Mailbox -User $User -AccessRights "FullAccess"
+    } elseif ($Permission -eq "SendAs"){
+        Remove-O365RecipientPermission -Identity $Mailbox -AccessRights SendAs -Trustee $User -Confirm:$false
+    } elseif ($Permission -eq "FullAccessAndSendAs") {
+        Remove-O365MailboxPermission -Identity $Mailbox -User $User -AccessRights "FullAccess"
+        Remove-O365RecipientPermission -Identity $Mailbox -AccessRights SendAs -Trustee $User -Confirm:$false
+    }
+}
+
 # Do Not Use. New-TervisMSOLUser is not ready for use with current hybrid setup with on-promise Exchange2016.
 #function New-TervisMSOLUser{
 #    [CmdletBinding()]
