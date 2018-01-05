@@ -593,3 +593,26 @@ function Invoke-ExoPSSessionScript {
     $ExoScriptPath = Get-ExoPSSessionScriptPath
     . $ExoScriptPath
 }
+
+function Get-MsolUsersByLicenseType {
+    param (
+        [Parameter(Mandatory)]
+        [ValidateSet("E1","E3","Unlicensed")]
+        $LicenseType
+    )
+    
+    switch ($LicenseType) {
+        "E1" {$License = "tervis0:STANDARDPACK"}
+        "E3" {$License = "tervis0:ENTERPRISEPACK"}
+    }
+    
+    Connect-TervisMsolService
+    $AllMSOL = Get-MsolUser -All
+    
+    if ($LicenseType -eq "Unlicensed") {
+        $AllMSOL | where IsLicensed -eq $false
+    } else {
+        $AllMSOL | where {$_.Licenses.AccountSkuId -contains $License}
+    }
+}
+
