@@ -1,4 +1,6 @@
 ﻿#Requires -Version 5
+$ModulePath = (Get-Module -ListAvailable TervisMSOnline).ModuleBase
+. $ModulePath\SpamDefinition.ps1
 
 function Test-TervisUserHasOffice365SharedMailbox {
     param(
@@ -554,4 +556,11 @@ function Get-ExoPSSessionScriptPath {
 function Invoke-ExoPSSessionScript {
     $ExoScriptPath = Get-ExoPSSessionScriptPath
     . $ExoScriptPath
+}
+
+function Sync-SpamDomainDefinitionWithOffice365 {
+    Import-TervisExchangePSSession
+
+    $SpamDomainDefinition.Domain
+     set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add="softwareleadsusa.com"}
 }
