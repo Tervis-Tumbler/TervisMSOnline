@@ -1,12 +1,12 @@
 ﻿$SpamDomainDefinition = [PSCustomObject][Ordered]@{
-    Domain = "karyatechsolutions.com"
-    Reason = "Unsolicited email"
-},
-[PSCustomObject][Ordered]@{
-    Domain = "erpmaestro.com"
-    Reason = "Unsolicited email"
-},
-[PSCustomObject][Ordered]@{
-    Domain = "softwareleadsusa.com"
+    Domain = 
+@"
+karyatechsolutions.com
+erpmaestro.com
+softwareleadsusa.com
+flycastpartners.com
+fastlanetrainingus.com
+xduce.com
+"@ -split "`r`n"
     Reason = "Unsolicited email"
 }

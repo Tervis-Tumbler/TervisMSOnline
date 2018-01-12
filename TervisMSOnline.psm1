@@ -596,10 +596,8 @@ function Invoke-ExoPSSessionScript {
 }
 
 function Sync-SpamDomainDefinitionWithOffice365 {
-    Import-TervisExchangePSSession
-
-    $SpamDomainDefinition.Domain
-     set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add="softwareleadsusa.com"}
+    Import-TervisEXOPSSession
+    Set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add=$SpamDomainDefinition.Domain}
 }
 
 function Get-MsolUsersByLicenseType {
