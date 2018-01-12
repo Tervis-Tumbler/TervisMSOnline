@@ -7,7 +7,7 @@ softwareleadsusa.com
 flycastpartners.com
 fastlanetrainingus.com
 xduce.com
-agates@hortonworks.com
+hortonworks.com
 "@ -split "`r`n"
     Reason = "Unsolicited email"
 }
