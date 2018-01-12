@@ -572,7 +572,6 @@ function Get-MsolUsersWithStrongAuthenticationNotConfigured {
     Write-Warning "`nUsers with MFA configured:`t`t$ConfiguredUserCount`nTotal number of users:`t`t`t$AllUserCount`nPercent with MFA configured:`t$PercentageConfigured"
 }
 
-
 function Get-ExoPSSessionScriptPath {
     $RootPath = "$env:LOCALAPPDATA\Apps\2.0"
     $ExoScriptName = "CreateExoPSSession.ps1"
@@ -602,6 +601,7 @@ function Sync-SpamDomainDefinitionWithOffice365 {
     $SpamDomainDefinition.Domain
      set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add="softwareleadsusa.com"}
 }
+
 function Get-MsolUsersByLicenseType {
     param (
         [Parameter(Mandatory)]
@@ -623,4 +623,3 @@ function Get-MsolUsersByLicenseType {
         $AllMSOL | where {$_.Licenses.AccountSkuId -contains $License}
     }
 }
-
