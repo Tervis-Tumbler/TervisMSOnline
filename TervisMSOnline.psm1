@@ -598,6 +598,16 @@ function Invoke-ExoPSSessionScript {
 function Sync-SpamDomainDefinitionWithOffice365 {
     Import-TervisEXOPSSession
     Set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add=$SpamDomainDefinition.Domain}
+    $DomainsFromEmailAddresses = $SpamDomainDefinition.EmailAddressesToTakeDomainFrom |
+    ForEach-Object {         
+        (
+            $_ -split "@" |
+            Select-Object -Skip 1
+        ) -replace ">",""
+    }
+    if ($DomainsFromEmailAddresses) {
+        Set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add=$DomainsFromEmailAddresses}
+    }
 }
 
 function Get-MsolUsersByLicenseType {
