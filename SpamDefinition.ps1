@@ -27,6 +27,8 @@ Quest International Users Group <Service@response.questdirect.org>
 Brandon Lacanaria <blacanaria@lifesize.com>
 Thomas Koll <tk@laplinkemail.com>
 virtualizationwebinars <news@virtualizationwebinars.com>
+Nexsan <connect@nexsan.com>
+Digital Juice <enewsletter@digitaljuice.com>
 "@ -split "`r`n"
     Reason = "Unsolicited email"
 }
