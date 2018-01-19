@@ -89,6 +89,13 @@ Paula Fretter <reply@thetotalemaildelivery.com>
 Chris Genazzio <chris@mdsny.com>
 Eric <eric@mjvtechnology.com>
 Combodo <contact=combodo.com@mail159.atl221.rsgsv.net>
+Emma O'Connor <emma.oconnor@cyarasolutions.com>
+Indeed <indeed@pr-post.com>
+Michael Nasmeh <michael.d.nasmeh@hedviginc.com>
+Innovative Data Solutions <info@innmktgsm1.com>
+Susie Watkins <susie@www-ldms.ccsend.com>
+Lindsay Forrest <lforrest@mydock365.com>
+Katie Lane <klane@serenova.com>
 "@ -split "`r`n"
     Reason = "Unsolicited email"
 }
