@@ -96,6 +96,64 @@ Innovative Data Solutions <info@innmktgsm1.com>
 Susie Watkins <susie@www-ldms.ccsend.com>
 Lindsay Forrest <lforrest@mydock365.com>
 Katie Lane <klane@serenova.com>
+Monica Salazar <monica.salazar@zoom.us>
+Prashant Kumar Sahu <prashant.sahu@wisemen.com>
+Brandon Lacanaria <blacanaria@lifesize.com>
+Tony Bishop <tony.bishop@equinix.com>
+New Horizons Computer Learning Center of Tampa <info.orlando@newhorizons.com>
+Spotinst <marketing@spotinst.com>
+Vertiv <ask@go.vertivco.com>
+Randi at Curvature <Randi@curvature.com>
+Paul Rivas <Paul.Rivas@auxis.com>
+Shaul Eliasi <shaul.eliasi@analyticalfactor.com>
+Rick Moore <rmoore@us.digitalrealty.com>
+Louis Abate <team@nasuni.com>
+Sherry Grote <gbusbee@stibosystems.com>
+CSPi <cspi@cspi-secV3.communityinsightinitiative.com>
+Drew King <info@tierpoint.com>
+Michael Nocerino, 451 Alliance <Membership@451Alliance.com>
+Paige Fowler <pfowler@eventtracker.com>
+MSDynamicsWorld.com <jgumpert=msdynamicsworld.com@mail168.wdc02.mcdlv.net>
+Dalton Godjikian <dalton@sosxrx.com>
+Eric Smith <eric@mjvtechnology.com>
+Progress Kinvey <progresssoftware@businessmaking.progress.net>
+Jane Rein <jane.rein@lansa.com>
+Fabiana Corredor <fabiana.corredor@auxis.com>
+Grant Waldrop <grant@reply.business.frontier.com>
+Jai Kruse <sales=cmdtechnologygroup.com@cmail19.com>
+Jai Kruse <sales@cmdtechnologygroup.com>
+Adam Berezin <aberezin=msdynamicsworld.com@mail110.atl111.rsgsv.net>
+Adam Berezin <aberezin@msdynamicsworld.com>
+Lauren Dillon <lauren.dillon@sunrise.co>
+Diamanti <marketing@diamanti.com>
+Educational Webcast - 2/8/2018 <william.craig@getgsi.com>
+GCA Sales <sales@gca.net>
+Jay Bouche <jbouche@trapptechnology.com>
+SearchVirtualDesktop.com <info@ed-email.techtarget.com>
+Jet Reports <sales.us@jetreports.com>
+Modern Enterprise Solutions <Contact@ModernEnterprise.com>
+Modern Enterprise Solutions <Contact=ModernEnterprise.com@cmail20.com>
+Michael Nasmeh <michael.s.nasmeh@hedviginc.com>
+Ehlinger, Tim <TEhlinger@kforce.com>
+kkaminsky@vology.com
+Chris Bailey <cbailey@mobileframe.com>
+Avaya Inc. <information@news.avaya.com>
+Tushar Nayak <tushar.nayak@atlassyst.com>
+Sumo Logic <marketing-info@sumologic.com>
+Paul Rivas <Paul.Rivas@auxis.com>
+United Data Technologies <marketing@udtonline.com>
+Robert Reinhardt <rreinhardt@silver-peak.com>
+Thomas Sullivan <tsullivan@itauthorities.com>
+Chelsey Paige <Chelsey@arc.systems>
+Andrea Beagin <Andrea.Beagin@1010data.com>
+MSDynamicsWorld.com <info@msdynamicsworld.com>
+EMA Design Automation <ema@ema-eda.com>
+John Scruton <john.scruton@citrix.com>
+Eric Egger <ericvegger@extrahop.com>
+Tim McSweeney <tmcsweeney@integrationpartners.com>
+Clarium Managed Services <arjun@clarium.tech>
+Clarium Managed Services <arjun=clarium.tech@cmail20.com>
+Polycom Inc. <Contact_Polycom_Americas@polycom.com>
 "@ -split "`r`n"
     Reason = "Unsolicited email"
 }
