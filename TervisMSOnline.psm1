@@ -76,7 +76,7 @@ function Import-TervisEXOPSSession {
 
     if (-Not $Session) {
         $ExoScriptPath = Get-ExoPSSessionScriptPath
-        Import-Module $ExoScriptPath
+        Import-Module $ExoScriptPath -Force
         Connect-EXOPSSession -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com" | Out-Null
 
         $Session = Get-PsSession |
