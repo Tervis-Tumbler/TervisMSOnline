@@ -597,11 +597,12 @@ function Invoke-ExoPSSessionScript {
 function Get-MsolUsersByLicenseType {
     param (
         [Parameter(Mandatory)]
-        [ValidateSet("E1","E3","Unlicensed")]
+        [ValidateSet("K1","E1","E3","Unlicensed")]
         $LicenseType
     )
     
     switch ($LicenseType) {
+        "K1" {$License = "tervis0:EXCHANGEDESKLESS"}
         "E1" {$License = "tervis0:STANDARDPACK"}
         "E3" {$License = "tervis0:ENTERPRISEPACK"}
     }
