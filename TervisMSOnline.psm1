@@ -1,4 +1,6 @@
 ﻿#Requires -Version 5
+$ModulePath = (Get-Module -ListAvailable TervisMSOnline).ModuleBase
+. $ModulePath\SpamDefinition.ps1
 
 function Test-TervisUserHasOffice365SharedMailbox {
     param(
@@ -74,7 +76,7 @@ function Import-TervisEXOPSSession {
 
     if (-Not $Session) {
         $ExoScriptPath = Get-ExoPSSessionScriptPath
-        Import-Module $ExoScriptPath
+        Import-Module $ExoScriptPath -Force
         Connect-EXOPSSession -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com" | Out-Null
 
         $Session = Get-PsSession |
@@ -570,7 +572,6 @@ function Get-MsolUsersWithStrongAuthenticationNotConfigured {
     Write-Warning "`nUsers with MFA configured:`t`t$ConfiguredUserCount`nTotal number of users:`t`t`t$AllUserCount`nPercent with MFA configured:`t$PercentageConfigured"
 }
 
-
 function Get-ExoPSSessionScriptPath {
     $RootPath = "$env:LOCALAPPDATA\Apps\2.0"
     $ExoScriptName = "CreateExoPSSession.ps1"
@@ -592,6 +593,21 @@ function Get-ExoPSSessionScriptPath {
 function Invoke-ExoPSSessionScript {
     $ExoScriptPath = Get-ExoPSSessionScriptPath
     . $ExoScriptPath
+}
+
+function Sync-SpamDomainDefinitionWithOffice365 {
+    Import-TervisEXOPSSession
+    Set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add=$SpamDomainDefinition.Domain}
+    $DomainsFromEmailAddresses = $SpamDomainDefinition.EmailAddressesToTakeDomainFrom |
+    ForEach-Object {         
+        (
+            $_ -split "@" |
+            Select-Object -Skip 1
+        ) -replace ">",""
+    }
+    if ($DomainsFromEmailAddresses) {
+        Set-O365HostedContentFilterPolicy -Identity default -BlockedSenderDomains @{Add=$DomainsFromEmailAddresses}
+    }
 }
 
 function Get-MsolUsersByLicenseType {
@@ -616,4 +632,3 @@ function Get-MsolUsersByLicenseType {
         $AllMSOL | where {$_.Licenses.AccountSkuId -contains $License}
     }
 }
-
