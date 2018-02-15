@@ -154,6 +154,8 @@ Tim McSweeney <tmcsweeney@integrationpartners.com>
 Clarium Managed Services <arjun@clarium.tech>
 Clarium Managed Services <arjun=clarium.tech@cmail20.com>
 Polycom Inc. <Contact_Polycom_Americas@polycom.com>
+Michael Nasmeh <michael.h.nasmeh@hedvig.us>
+Cylance Inc. <marcyl@cylance.com>
 "@ -split "`r`n"
     Reason = "Unsolicited email"
 }

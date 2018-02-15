@@ -22,6 +22,13 @@ function Import-TervisOffice365ExchangePSSession {
     $MSOLUser = Get-MsolUser -UserPrincipalName "$env:USERNAME@$env:USERDOMAIN.com"
     
     if ($MSOLUser.StrongAuthenticationRequirements -and $MSOLUser.StrongAuthenticationRequirements.State -ne "Disabled") {
+        Get-Module | Where-Object Name -Match tmp | Remove-Module -Force
+        
+        Get-PsSession |
+        Where ComputerName -eq "outlook.office365.com" |
+        Where ConfigurationName -eq "Microsoft.Exchange" |
+        Remove-PSSession
+
         Import-TervisEXOPSSession
     } 
     else {
