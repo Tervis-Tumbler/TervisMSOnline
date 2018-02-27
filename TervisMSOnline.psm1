@@ -632,3 +632,12 @@ function Get-MsolUsersByLicenseType {
         $AllMSOL | where {$_.Licenses.AccountSkuId -contains $License}
     }
 }
+
+function Get-TervisO365MailboxUserHasAccessto {
+    param ([parameter(Mandatory)]$User,
+          [Parameter(Mandatory)][ValidateSet("SharedMailBox","UserMailbox")][String]$mailboxType 
+    )
+    Import-TervisOffice365ExchangePSSession
+    Get-O365Mailbox -RecipientTypeDetails $mailboxType -ResultSize unlimited | Get-O365MailboxPermission -User $User 
+
+}        
