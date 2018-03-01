@@ -650,7 +650,7 @@ function Get-TervisO365MailboxUserHasAccessto {
 }
 
 function Connect-EXOPSSessionWithinExchangeOnlineShell {
-    if (Get-ChildItem -Path function:\Connect-EXOPSSession) { #Test whether we are in a Exchange Online PowerShell Module console shell
+    if (Get-ChildItem -Path function:\Connect-EXOPSSession -ErrorAction SilentlyContinue) { #Test whether we are in a Exchange Online PowerShell Module console shell
         $GetMailboxFunction = Get-ChildItem -Path function:\Get-Mailbox #Test whether we have already ran Connect-EXOPSSession
         if ( -not $GetMailboxFunction ) {
             $EXOPsSessionModule = Connect-EXOPSSession #Store the tmp module output in case we want to try later to import with namespace
