@@ -201,9 +201,8 @@ function Remove-TervisMobileDevice {
     $UserPrincipalName = Get-ADUser -Identity $Identity -properties UserPrincipalName -ErrorAction SilentlyContinue |
     Select-Object -ExpandProperty UserPrincipalName
 
-    Get-O365MobileDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue | 
-    Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
-    Remove-O365MobileDevice -Confirm:$false
+    Get-O365MobileDevice -Mailbox $UserPrincipalName -ErrorAction SilentlyContinue |
+    Remove-O365MobileDevice -Confirm:$false 
 }
 
 function Remove-TervisMSOLUser {
