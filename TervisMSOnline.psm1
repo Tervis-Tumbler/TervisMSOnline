@@ -538,19 +538,6 @@ function Disable-Office365MultiFactorAuthentication {
     }
 }
 
-function Reset-Office365MultiFactorAuthentication {
-    param (
-        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName
-    )
-    begin {
-        Connect-TervisMsolService
-    }
-    process {
-        Disable-Office365MultiFactorAuthentication -UserPrincipalName $UserPrincipalName
-        Enable-Office365MultiFactorAuthentication -UserPrincipalName $UserPrincipalName
-    }
-}
-
 function Get-MsolUsersWithAnE1OrE3LicenseExcludingServiceAccounts {
     param (
         [Switch]$ExcludeUsersWithStrongAuthenticationEnforced
