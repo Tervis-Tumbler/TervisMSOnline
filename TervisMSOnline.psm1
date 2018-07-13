@@ -389,7 +389,7 @@ function Install-MoveSharedMailboxObjectsScheduledTasks {
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
     )
     begin {
-        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstateCredential -PasswordID 259)
+        $ScheduledTaskCredential = Get-PasswordstatePassword -AsCredential -ID 259
         $TargetOU = Get-ADOrganizationalUnit -Filter {Name -eq "Shared Mailbox"} | `
             Where DistinguishedName -match 'OU=Shared Mailbox,OU=Exchange,DC=' | `
             Select -ExpandProperty DistinguishedName
@@ -535,6 +535,19 @@ function Disable-Office365MultiFactorAuthentication {
         $auth.RememberDevicesNotIssuedBefore = (Get-Date)
 
         Set-MsolUser -UserPrincipalName $UserPrincipalName -StrongAuthenticationRequirements $auth
+    }
+}
+
+function Reset-Office365MultiFactorAuthentication {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$UserPrincipalName
+    )
+    begin {
+        Connect-TervisMsolService
+    }
+    process {
+        Disable-Office365MultiFactorAuthentication -UserPrincipalName $UserPrincipalName
+        Enable-Office365MultiFactorAuthentication -UserPrincipalName $UserPrincipalName
     }
 }
 
