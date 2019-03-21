@@ -482,27 +482,64 @@ function Remove-TervisO365MailboxPermission{
     }
 }
 
-# Do Not Use. New-TervisMSOLUser is not ready for use with current hybrid setup with on-promise Exchange2016.
-#function New-TervisMSOLUser{
-#    [CmdletBinding()]
-#    param(
-#        [paramete r(mandatory)]$Identity,
-#        [parameter(mandatory)]$AzureADConnectComputerName
-#    )
-#
-#    $UserObject = get-aduser $Identity -properties DistinguishedName,UserPrincipalName,ProtectedFromAccidentalDeletion
-#    $DN = $UserObject | select -ExpandProperty DistinguishedName
-#    $UserPrincipalName = $UserObject | select -ExpandProperty UserPrincipalName
-#
-#    Import-TervisMSOnlinePSSession
-#
-#    Enable-O365Mailbox -Identity $Identity -RoleAssignmentPolicy "Default Role Assignment Policy"
-#
-#    $Credential = Get-ExchangeOnlineCredential
-#    Connect-MsolService -Credential $Credential
-#    Write-Verbose "Adding the Users Office 365 Licenses"
-#    Set-MsolUserLicense -UserPrincipalName $UserPrincipalName -AddLicenses "Office 365 Enterprise E3"
-#}
+function New-TervisMSOLUser {
+    param (
+        [Parameter(Mandatory)]$ADUser,
+        [Switch]$UserHasTheirOwnDedicatedComputer
+    )
+    if (-not $ADUser.O365Mailbox -and -not $ADUser.ExchangeMailbox -and -not $ADUser.ExchangeRemoteMailbox) {
+        Enable-ExchangeRemoteMailbox -identity $ADUser.SamAccountName -RemoteRoutingAddress "$($ADUser.SamAccountName)@tervis0.mail.onmicrosoft.com"
+        Sync-ADDomainControllers -Blocking
+    }
+
+    if (-not $ADUser.O365Mailbox -and $ADUser.ExchangeRemoteMailbox) {
+        Invoke-ADAzureSync
+
+        Connect-TervisMsolService
+        While (-not (Get-MsolUser -UserPrincipalName $ADUser.UserPrincipalName -ErrorAction SilentlyContinue)) {
+            Start-Sleep 30
+        }
+        
+        $License = if ($UserHasTheirOwnDedicatedComputer) { "E3" } else { "E1" }
+        $ADUser | Set-TervisMSOLUserLicense -License $License
+        
+        While (-Not $ADUser.O365Mailbox) {
+            Start-Sleep 60
+        }
+    }
+
+    if ($ADUser.O365Mailbox -and -not $ADUser.ExchangeMailbox -and $ADUser.ExchangeRemoteMailbox) {
+
+        $InExchangeOnlinePowerShellModuleShell = Connect-EXOPSSessionWithinExchangeOnlineShell
+        if (-not $InExchangeOnlinePowerShellModuleShell) {
+            Import-TervisOffice365ExchangePSSession
+        } else {
+            New-Alias -Name Get-O365OutboundConnector -Value Get-OutboundConnector
+            New-Alias -Name New-O365MoveRequest -Value New-MoveRequest
+            New-Alias -Name Get-O365MoveRequest -Value Get-MoveRequest
+            New-Alias -Name Get-O365MoveRequestStatistics -Value Get-MoveRequestStatistics
+            New-Alias -Name Set-O365Mailbox -Value Set-Mailbox
+            New-Alias -Name Set-O365Clutter -Value Set-Clutter
+            New-Alias -Name Set-O365FocusedInbox -Value Set-FocusedInbox
+        }
+        
+        if ($UserHasTheirOwnDedicatedComputer) {
+            Set-O365Mailbox $ADUser.UserPrincipalName -AuditOwner MailboxLogin,HardDelete,SoftDelete,Move,MoveToDeletedItems -AuditDelegate HardDelete,SendAs,Move,MoveToDeletedItems,SoftDelete -AuditEnabled $true -RetainDeletedItemsFor 30.00:00:00 -LitigationHoldDuration 2555 -LitigationHoldEnabled $true
+            Import-TervisExchangePSSession
+            Enable-ExchangeRemoteMailbox $ADUser.UserPrincipalName -Archive
+        } else {
+            Set-O365Mailbox $ADUser.UserPrincipalName -AuditOwner MailboxLogin,HardDelete,SoftDelete,Move,MoveToDeletedItems -AuditDelegate HardDelete,SendAs,Move,MoveToDeletedItems,SoftDelete -AuditEnabled $true -RetainDeletedItemsFor 30.00:00:00
+        }
+
+        Set-O365Clutter -Identity $ADUser.UserPrincipalName -Enable $false
+        Set-O365FocusedInbox -Identity $ADUser.UserPrincipalName -FocusedInboxOn $false
+        Enable-Office365MultiFactorAuthentication -UserPrincipalName $ADUser.UserPrincipalName
+    }
+
+    if ($ADUser.O365Mailbox -and $ADUser.ExchangeMailbox) {
+        Throw "$($ADUser.SamAccountName) has both an Office 365 mailbox and an exchange mailbox"
+    }
+}
 
 function Enable-Office365MultiFactorAuthentication {
     param (
